@@ -1,0 +1,82 @@
+---
+import { getEntry } from "astro:content";
+import Base from "../layouts/Base.astro";
+import SectionHead from "../components/SectionHead.astro";
+
+const profile = await getEntry("profile", "profile");
+if (!profile) throw new Error("ไม่พบ profile.json");
+const p = profile.data;
+---
+
+<Base title="ประวัติส่วนตัว" description={`ประวัติการศึกษา ทักษะ และช่องทางติดต่อของ ${p.fullName}`}>
+  <div class="page">
+    <SectionHead eyebrow="ประวัติส่วนตัว" title="ประวัติและทักษะ" lede={p.intro} />
+
+    <div class="cols">
+      <section class="card box">
+        <h2>ประวัติการศึกษา</h2>
+        <ol class="timeline">
+          {p.education.map((e) => (
+            <li>
+              <span class="yr">{e.year}</span>
+              <span class="dt">{e.detail}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section class="card box">
+        <h2>ทักษะ</h2>
+        <ul class="skills">
+          {p.skills.map((s) => (
+            <li><span>{s.name}</span><span class="chip">{s.level}</span></li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="card box">
+        <h2>ความสามารถพิเศษ</h2>
+        <ul class="bullets">
+          {p.talents.map((t) => <li>{t}</li>)}
+        </ul>
+      </section>
+
+      <section class="card box">
+        <h2>ช่องทางติดต่อ</h2>
+        <ul class="contacts">
+          {p.contacts.map((c) => (
+            <li>
+              <span class="lbl">{c.label}</span>
+              {c.href ? <a href={c.href}>{c.value}</a> : <span>{c.value}</span>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 1.1rem; }
+  .box { padding: 1.25rem 1.35rem 1.4rem; }
+  .box h2 { font-size: 1.05rem; margin-bottom: .8rem; color: var(--accent); }
+
+  .timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .9rem; }
+  .timeline li { display: flex; flex-direction: column; padding-left: 1rem; border-left: 2px solid var(--line); }
+  .yr { font-family: var(--font-display); font-size: .8rem; color: var(--ink-soft); }
+  .dt { font-size: .96rem; }
+
+  .skills { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+  .skills li { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
+
+  .bullets { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .35rem; }
+  .bullets li::marker { color: var(--leaf); }
+
+  .contacts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+  .contacts li { display: flex; gap: .8rem; align-items: baseline; flex-wrap: wrap; }
+  .lbl {
+    font-family: var(--font-display); font-size: .74rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-soft); min-width: 5.5rem;
+  }
+  .contacts a { color: var(--accent); }
+</style>

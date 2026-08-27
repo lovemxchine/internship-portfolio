@@ -1,0 +1,192 @@
+---
+import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import SectionHead from "../components/SectionHead.astro";
+
+const items = await getCollection("gallery");
+const categories = ["ทั้งหมด", "การทำงาน", "การประชุม", "กิจกรรมบริษัท", "ผลงานที่ภาคภูมิใจ"];
+---
+
+<Base title="แกลเลอรี" description="รวมภาพและวิดีโอกิจกรรมระหว่างการฝึกงาน">
+  <div class="page">
+    <SectionHead
+      eyebrow="แกลเลอรี"
+      title="ภาพและวิดีโอกิจกรรม"
+      lede="รวมบรรยากาศการทำงาน การประชุม กิจกรรมบริษัท และผลงานที่ภาคภูมิใจ กดที่ภาพเพื่อดูขนาดเต็ม"
+    />
+
+    <div class="filters" role="group" aria-label="กรองตามหมวด">
+      {
+        categories.map((c, i) => (
+          <button type="button" class:list={["fbtn", { on: i === 0 }]} data-cat={c}>
+            {c}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="grid">
+      {
+        items.map((item) => {
+          const d = item.data;
+          if (d.kind === "photo") {
+            return (
+              <figure class="tile card" data-cat={d.category}>
+                <button type="button" class="open" data-full={d.src.src} data-cap={d.caption}>
+                  <Image src={d.src} alt={d.caption} widths={[360, 720]} sizes="(max-width: 700px) 50vw, 320px" />
+                  <span class="sr-only">ดูภาพขนาดเต็ม: {d.caption}</span>
+                </button>
+                <figcaption>
+                  <span class="chip">{d.category}</span>
+                  <span>{d.caption}</span>
+                </figcaption>
+              </figure>
+            );
+          }
+
+          if (d.kind === "video-upload") {
+            return (
+              <figure class="tile card wide" data-cat={d.category}>
+                <video controls preload="none" poster={d.poster?.src} playsinline>
+                  <source src={d.file} type="video/mp4" />
+                  เบราว์เซอร์ของคุณไม่รองรับการเล่นวิดีโอ
+                </video>
+                <figcaption>
+                  <span class="chip">{d.category}</span>
+                  <span>{d.caption}</span>
+                </figcaption>
+              </figure>
+            );
+          }
+
+          return (
+            <figure class="tile card wide" data-cat={d.category}>
+              <div class="ratio">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${d.youtubeId}`}
+                  title={d.caption}
+                  loading="lazy"
+                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                />
+              </div>
+              <figcaption>
+                <span class="chip">{d.category}</span>
+                <span>{d.caption}</span>
+              </figcaption>
+            </figure>
+          );
+        })
+      }
+    </div>
+
+    <dialog id="lb">
+      <form method="dialog"><button class="x" aria-label="ปิด">✕</button></form>
+      <img id="lb-img" alt="" />
+      <p id="lb-cap"></p>
+    </dialog>
+  </div>
+</Base>
+
+<script>
+  const dlg = document.querySelector<HTMLDialogElement>("#lb");
+  const img = document.querySelector<HTMLImageElement>("#lb-img");
+  const cap = document.querySelector<HTMLParagraphElement>("#lb-cap");
+
+  document.querySelectorAll<HTMLButtonElement>(".open").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (!dlg || !img || !cap) return;
+      img.src = btn.dataset.full ?? "";
+      img.alt = btn.dataset.cap ?? "";
+      cap.textContent = btn.dataset.cap ?? "";
+      dlg.showModal();
+    });
+  });
+
+  // คลิกพื้นหลังเพื่อปิด
+  dlg?.addEventListener("click", (e) => {
+    if (e.target === dlg) dlg.close();
+  });
+
+  const tiles = document.querySelectorAll<HTMLElement>(".tile");
+  document.querySelectorAll<HTMLButtonElement>(".fbtn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".fbtn").forEach((b) => b.classList.remove("on"));
+      btn.classList.add("on");
+      const cat = btn.dataset.cat;
+      tiles.forEach((t) => {
+        t.hidden = cat !== "ทั้งหมด" && t.dataset.cat !== cat;
+      });
+    });
+  });
+</script>
+
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: .45rem; padding-bottom: 1.1rem; }
+  .fbtn {
+    font-family: var(--font-display);
+    font-size: .86rem;
+    padding: .38rem .95rem;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background .16s ease, color .16s ease, border-color .16s ease;
+  }
+  .fbtn:hover { border-color: var(--accent); color: var(--ink); }
+  .fbtn.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+    gap: 1rem;
+    padding-bottom: 1rem;
+  }
+  .tile { margin: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .tile[hidden] { display: none; }
+  .tile.wide { grid-column: span 2; }
+  @media (max-width: 560px) { .tile.wide { grid-column: span 1; } }
+
+  .open {
+    display: block; padding: 0; border: 0; background: none; cursor: zoom-in; width: 100%;
+  }
+  .open :global(img) { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; transition: transform .3s ease; }
+  .open:hover :global(img) { transform: scale(1.04); }
+
+  video { width: 100%; aspect-ratio: 16 / 9; background: #000; display: block; }
+  .ratio { position: relative; aspect-ratio: 16 / 9; background: #000; }
+  .ratio iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  figcaption {
+    padding: .7rem .85rem .85rem;
+    font-size: .87rem;
+    color: var(--ink-soft);
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    align-items: flex-start;
+  }
+
+  dialog {
+    border: 0;
+    border-radius: var(--r);
+    padding: 0;
+    background: var(--surface);
+    color: var(--ink);
+    max-width: min(92vw, 1000px);
+    max-height: 92vh;
+    overflow: hidden;
+  }
+  dialog::backdrop { background: rgba(30, 20, 12, .72); backdrop-filter: blur(3px); }
+  dialog img { width: 100%; max-height: 78vh; object-fit: contain; background: var(--surface-2); }
+  dialog p { padding: .8rem 1rem 1rem; font-size: .9rem; color: var(--ink-soft); }
+  .x {
+    position: absolute; right: .6rem; top: .6rem; z-index: 2;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 0; cursor: pointer;
+    background: var(--surface); color: var(--ink);
+    box-shadow: var(--shadow); font-size: 1rem;
+  }
+</style>

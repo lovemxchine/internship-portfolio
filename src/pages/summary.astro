@@ -1,0 +1,46 @@
+---
+import { getEntry } from "astro:content";
+import Base from "../layouts/Base.astro";
+import SectionHead from "../components/SectionHead.astro";
+
+const entry = await getEntry("summary", "summary");
+if (!entry) throw new Error("ไม่พบ summary.json");
+const s = entry.data;
+---
+
+<Base title="สรุปผลการฝึกงาน" description={s.gained}>
+  <div class="page narrow">
+    <SectionHead eyebrow="บทสรุป" title="สรุปผลการฝึกงาน" />
+
+    <section class="card blk">
+      <h2>สิ่งที่ได้รับจากการฝึกงาน</h2>
+      <p>{s.gained}</p>
+    </section>
+
+    <section class="card blk">
+      <h2>ทักษะที่พัฒนา</h2>
+      <ul class="bullets">{s.skillsDeveloped.map((x) => <li>{x}</li>)}</ul>
+    </section>
+
+    <section class="card blk">
+      <h2>ความประทับใจ</h2>
+      <p>{s.impression}</p>
+    </section>
+
+    <section class="card blk leaf">
+      <h2>ข้อเสนอแนะ</h2>
+      <p>{s.suggestion}</p>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .narrow { max-width: 780px; }
+  .blk { padding: 1.25rem 1.4rem 1.45rem; }
+  .blk + .blk { margin-top: 1rem; }
+  .blk h2 { font-size: 1.02rem; color: var(--accent); margin-bottom: .55rem; }
+  .blk.leaf { background: var(--leaf-soft); border-color: transparent; }
+  .blk.leaf h2 { color: var(--leaf); }
+  .bullets { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .35rem; }
+  .bullets li::marker { color: var(--leaf); }
+</style>

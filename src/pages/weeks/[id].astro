@@ -1,0 +1,128 @@
+---
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import PhotoGrid from "../../components/PhotoGrid.astro";
+import { formatRange } from "../../lib/date";
+
+export const getStaticPaths = (async () => {
+  const weeks = await getCollection("weeks");
+  const sorted = weeks.sort((a, b) => a.data.weekNumber - b.data.weekNumber);
+  return sorted.map((w, i) => ({
+    params: { id: w.id },
+    props: { week: w, prev: sorted[i - 1] ?? null, next: sorted[i + 1] ?? null },
+  }));
+}) satisfies GetStaticPaths;
+
+const { week, prev, next } = Astro.props;
+const w = week.data;
+const base = import.meta.env.BASE_URL;
+---
+
+<Base title={`สัปดาห์ที่ ${w.weekNumber} · ${w.title}`} description={w.assignment}>
+  <article class="page narrow">
+    <p class="crumb"><a href={`${base}weeks`}>← ผลงานรายสัปดาห์</a></p>
+
+    <header class="head">
+      <span class="badge">สัปดาห์ที่ {w.weekNumber}</span>
+      <h1>{w.title}</h1>
+      <p class="date">{formatRange(w.dateStart, w.dateEnd)}</p>
+    </header>
+
+    <section class="card blk">
+      <h2>งานที่ได้รับมอบหมาย</h2>
+      <p>{w.assignment}</p>
+    </section>
+
+    <section class="card blk">
+      <h2>ขั้นตอนการทำงาน</h2>
+      <ol class="steps">{w.steps.map((s) => <li>{s}</li>)}</ol>
+    </section>
+
+    <section class="photos">
+      <h2>ภาพประกอบ</h2>
+      <PhotoGrid photos={w.photos} />
+    </section>
+
+    <section class="card blk leaf">
+      <h2>สิ่งที่ได้เรียนรู้</h2>
+      <p>{w.learned}</p>
+    </section>
+
+    <div class="pair">
+      <section class="card blk">
+        <h2>ปัญหาที่พบ</h2>
+        <p>{w.problem}</p>
+      </section>
+      <section class="card blk">
+        <h2>วิธีแก้ไขปัญหา</h2>
+        <p>{w.solution}</p>
+      </section>
+    </div>
+
+    <nav class="pager" aria-label="สัปดาห์ก่อนหน้าและถัดไป">
+      {prev ? (
+        <a class="pg" href={`${base}weeks/${prev.id}`}>
+          <span>← สัปดาห์ที่ {prev.data.weekNumber}</span>
+          <strong>{prev.data.title}</strong>
+        </a>
+      ) : <span />}
+      {next ? (
+        <a class="pg right" href={`${base}weeks/${next.id}`}>
+          <span>สัปดาห์ที่ {next.data.weekNumber} →</span>
+          <strong>{next.data.title}</strong>
+        </a>
+      ) : <span />}
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .narrow { max-width: 820px; }
+  .crumb { padding-top: 1.4rem; font-size: .9rem; }
+  .crumb a { color: var(--accent); text-decoration: none; font-family: var(--font-display); font-weight: 500; }
+
+  .head { padding-block: 1rem 1.5rem; }
+  .badge {
+    display: inline-block; font-family: var(--font-display); font-size: .78rem; font-weight: 600;
+    background: var(--accent); color: var(--accent-ink);
+    padding: .2rem .8rem; border-radius: var(--r-pill); margin-bottom: .6rem;
+  }
+  .head h1 { font-size: clamp(1.5rem, 4.5vw, 2.1rem); }
+  .date { color: var(--ink-soft); font-size: .92rem; margin-top: .3rem; }
+
+  .blk { padding: 1.2rem 1.35rem 1.35rem; }
+  .blk + .blk, .photos + .blk, .blk + .pair, .photos { margin-top: 1rem; }
+  .blk h2, .photos h2 { font-size: 1rem; color: var(--accent); margin-bottom: .55rem; }
+  .blk.leaf { background: var(--leaf-soft); border-color: transparent; }
+  .blk.leaf h2 { color: var(--leaf); }
+
+  .steps { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: .4rem; }
+  .steps li::marker { color: var(--accent); font-family: var(--font-display); font-weight: 600; }
+
+  .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1rem; }
+  .pair .blk { margin-top: 0; }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .8rem;
+    margin-top: 1.8rem;
+  }
+  .pg {
+    display: flex; flex-direction: column; gap: .15rem;
+    padding: .85rem 1rem;
+    border: 1px solid var(--line); border-radius: var(--r);
+    background: var(--surface); text-decoration: none; color: inherit;
+    transition: border-color .18s ease;
+  }
+  .pg:hover { border-color: var(--accent); }
+  .pg span { font-family: var(--font-display); font-size: .82rem; color: var(--accent); }
+  .pg strong { font-size: .92rem; font-weight: 500; }
+  .pg.right { text-align: right; }
+
+  @media (max-width: 620px) {
+    .pager { grid-template-columns: 1fr; }
+    .pg.right { text-align: left; }
+  }
+</style>

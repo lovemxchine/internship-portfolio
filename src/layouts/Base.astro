@@ -1,0 +1,195 @@
+---
+import "../styles/tokens.css";
+import { getEntry } from "astro:content";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+const profile = await getEntry("profile", "profile");
+const name = profile?.data.fullName ?? "";
+const base = import.meta.env.BASE_URL;
+const here = Astro.url.pathname.replace(/\/$/, "");
+
+const nav = [
+  { href: base, label: "หน้าแรก" },
+  { href: `${base}profile`, label: "ประวัติส่วนตัว" },
+  { href: `${base}weeks`, label: "ผลงานรายสัปดาห์" },
+  { href: `${base}gallery`, label: "แกลเลอรี" },
+  { href: `${base}summary`, label: "สรุปผลฝึกงาน" },
+];
+
+const isActive = (href: string) => {
+  const clean = href.replace(/\/$/, "");
+  return clean === base.replace(/\/$/, "") ? here === clean : here.startsWith(clean);
+};
+---
+
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · {name}</title>
+    {description && <meta name="description" content={description} />}
+    <meta name="theme-color" content="#c4633f" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;500;600&display=swap"
+    />
+  </head>
+  <body>
+    <a href="#main" class="skip">ข้ามไปยังเนื้อหาหลัก</a>
+
+    <header class="site-head">
+      <div class="page head-inner">
+        <a href={base} class="brand">
+          <span class="mark" aria-hidden="true"></span>
+          <span class="brand-text">
+            <strong>{name}</strong>
+            <small>บันทึกการฝึกงาน</small>
+          </span>
+        </a>
+
+        <input type="checkbox" id="navtoggle" class="sr-only" />
+        <label for="navtoggle" class="burger" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </label>
+
+        <nav class="nav" aria-label="เมนูหลัก">
+          {
+            nav.map((item) => (
+              <a href={item.href} class:list={["nav-link", { on: isActive(item.href) }]}>
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="site-foot">
+      <div class="page">
+        <p>{name} · บันทึกผลงานการฝึกงานประจำสัปดาห์</p>
+        <p class="tiny">อัปเดตล่าสุด {new Date().toLocaleDateString("th-TH", { dateStyle: "long" })}</p>
+      </div>
+    </footer>
+
+    <style>
+      .skip {
+        position: absolute;
+        left: -9999px;
+        background: var(--accent);
+        color: var(--accent-ink);
+        padding: .6rem 1rem;
+        border-radius: 0 0 var(--r-sm) 0;
+        z-index: 100;
+      }
+      .skip:focus { left: 0; top: 0; }
+
+      .site-head {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--line);
+      }
+      .head-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding-block: .7rem;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: .65rem;
+        text-decoration: none;
+      }
+      .mark {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, var(--accent), var(--leaf));
+        flex: none;
+      }
+      .brand-text { display: flex; flex-direction: column; line-height: 1.25; }
+      .brand-text strong { font-family: var(--font-display); font-size: .98rem; }
+      .brand-text small { color: var(--ink-soft); font-size: .74rem; }
+
+      .nav { display: flex; gap: .2rem; flex-wrap: wrap; }
+      .nav-link {
+        font-family: var(--font-display);
+        font-size: .9rem;
+        text-decoration: none;
+        padding: .42rem .8rem;
+        border-radius: var(--r-pill);
+        color: var(--ink-soft);
+        transition: background .18s ease, color .18s ease;
+      }
+      .nav-link:hover { background: var(--surface-2); color: var(--ink); }
+      .nav-link.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
+      .burger { display: none; }
+
+      @media (max-width: 760px) {
+        .burger {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 5px;
+          width: 42px;
+          height: 42px;
+          padding: 0 9px;
+          border-radius: var(--r-sm);
+          border: 1px solid var(--line);
+          background: var(--surface);
+          cursor: pointer;
+        }
+        .burger span {
+          display: block;
+          height: 2px;
+          background: var(--ink);
+          border-radius: 2px;
+          transition: transform .2s ease, opacity .2s ease;
+        }
+        .nav {
+          display: none;
+          width: 100%;
+          flex-direction: column;
+          gap: .15rem;
+          padding-bottom: .5rem;
+        }
+        #navtoggle:checked ~ .nav { display: flex; }
+        #navtoggle:checked ~ .burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        #navtoggle:checked ~ .burger span:nth-child(2) { opacity: 0; }
+        #navtoggle:checked ~ .burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        #navtoggle:focus-visible ~ .burger { outline: 2px solid var(--accent); outline-offset: 3px; }
+        .nav-link { padding: .6rem .9rem; }
+      }
+
+      main { display: block; padding-bottom: 4rem; }
+
+      .site-foot {
+        border-top: 1px solid var(--line);
+        background: var(--surface-2);
+        padding-block: 1.6rem;
+        color: var(--ink-soft);
+        font-size: .9rem;
+        text-align: center;
+      }
+      .tiny { font-size: .8rem; opacity: .8; margin-top: .2rem; }
+    </style>
+  </body>
+</html>

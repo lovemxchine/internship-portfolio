@@ -1,0 +1,139 @@
+---
+import { Image } from "astro:assets";
+import { getCollection, getEntry } from "astro:content";
+import Base from "../layouts/Base.astro";
+import WeekCard from "../components/WeekCard.astro";
+import { formatRange } from "../lib/date";
+
+const profile = await getEntry("profile", "profile");
+if (!profile) throw new Error("ไม่พบ profile.json");
+const p = profile.data;
+
+const weeks = (await getCollection("weeks")).sort((a, b) => a.data.weekNumber - b.data.weekNumber);
+const latest = weeks.slice(-2).reverse();
+const base = import.meta.env.BASE_URL;
+---
+
+<Base title="หน้าแรก" description={p.intro}>
+  <section class="hero">
+    <div class="page hero-inner">
+      <div class="hero-text stack">
+        <p class="eyebrow">บันทึกผลงานการฝึกงาน</p>
+        <h1>{p.fullName}</h1>
+        <p class="role">{p.department} · {p.company}</p>
+        <p class="intro lede">{p.intro}</p>
+        <dl class="facts">
+          <div><dt>รหัสนักศึกษา</dt><dd>{p.studentId}</dd></div>
+          <div><dt>ระยะเวลาฝึกงาน</dt><dd>{p.periodLabel}</dd></div>
+          <div><dt>บันทึกแล้ว</dt><dd>{weeks.length} สัปดาห์</dd></div>
+        </dl>
+        <p class="cta">
+          <a class="btn" href={`${base}weeks`}>ดูผลงานรายสัปดาห์</a>
+          <a class="btn ghost" href={`${base}profile`}>ประวัติส่วนตัว</a>
+        </p>
+      </div>
+
+      <div class="hero-photo">
+        <Image src={p.avatar} alt={`รูปของ ${p.fullName}`} widths={[320, 640]} sizes="(max-width: 860px) 60vw, 320px" />
+      </div>
+    </div>
+  </section>
+
+  <section class="page latest">
+    <div class="latest-head">
+      <h2>บันทึกล่าสุด</h2>
+      <a class="all" href={`${base}weeks`}>ดูทั้งหมด →</a>
+    </div>
+    <div class="cards">
+      {
+        latest.map((w) => (
+          <WeekCard
+            href={`${base}weeks/${w.id}`}
+            weekNumber={w.data.weekNumber}
+            title={w.data.title}
+            dateLabel={formatRange(w.data.dateStart, w.data.dateEnd)}
+            assignment={w.data.assignment}
+            photoCount={w.data.photos.length}
+            cover={w.data.photos[0].src}
+            coverAlt={w.data.photos[0].caption}
+          />
+        ))
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { background: linear-gradient(180deg, var(--accent-soft), transparent 70%); }
+  .hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr);
+    gap: clamp(1.5rem, 5vw, 3rem);
+    align-items: center;
+    padding-block: clamp(2rem, 7vw, 4.2rem);
+  }
+  .hero-text h1 { font-size: clamp(1.9rem, 6vw, 3rem); }
+  .role { font-family: var(--font-display); font-weight: 500; color: var(--accent); }
+  .intro { font-size: 1.02rem; }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem 2rem;
+    margin: 0;
+    padding-top: .3rem;
+  }
+  .facts div { display: flex; flex-direction: column; }
+  .facts dt {
+    font-family: var(--font-display);
+    font-size: .72rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .facts dd { margin: 0; font-weight: 600; }
+
+  .cta { display: flex; gap: .6rem; flex-wrap: wrap; padding-top: .5rem; }
+  .btn {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: .95rem;
+    text-decoration: none;
+    padding: .62rem 1.25rem;
+    border-radius: var(--r-pill);
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: 1px solid var(--accent);
+    transition: transform .16s ease, box-shadow .16s ease;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .btn.ghost { background: transparent; color: var(--accent); }
+
+  .hero-photo :global(img) {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    border: 5px solid var(--surface);
+    rotate: 2deg;
+  }
+
+  .latest { padding-block: clamp(1.5rem, 5vw, 2.5rem); }
+  .latest-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .latest-head h2 { font-size: 1.35rem; }
+  .all { font-family: var(--font-display); font-size: .9rem; font-weight: 600; color: var(--accent); text-decoration: none; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 1.1rem; }
+
+  @media (max-width: 860px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-photo { order: -1; max-width: 220px; }
+    .hero-photo :global(img) { rotate: 0deg; }
+  }
+</style>

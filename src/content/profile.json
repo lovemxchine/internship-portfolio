@@ -1,0 +1,33 @@
+[
+  {
+    "id": "profile",
+    "fullName": "ชนม์นิภา วัฒนพงศ์",
+    "studentId": "6512345678",
+    "avatar": "../assets/profile/avatar.jpg",
+    "company": "บริษัท ดิจิทัล มาร์เก็ตติ้ง กรุ๊ป จำกัด",
+    "department": "แผนกการตลาดดิจิทัล",
+    "periodLabel": "1 มิถุนายน – 30 กันยายน 2569",
+    "intro": "นักศึกษาชั้นปีที่ 4 สาขาการตลาดดิจิทัล สนใจงานด้านคอนเทนต์และการวิเคราะห์ข้อมูลผู้บริโภค ระหว่างฝึกงานได้ร่วมดูแลคอนเทนต์บนโซเชียลมีเดียและช่วยจัดทำรายงานผลแคมเปญประจำเดือน",
+    "education": [
+      { "year": "2566 – ปัจจุบัน", "detail": "ปริญญาตรี สาขาการตลาดดิจิทัล คณะบริหารธุรกิจ" },
+      { "year": "2563 – 2566", "detail": "มัธยมศึกษาตอนปลาย แผนการเรียนศิลป์–คำนวณ" }
+    ],
+    "skills": [
+      { "name": "Content Marketing", "level": "ใช้งานได้ดี" },
+      { "name": "Canva / Figma", "level": "ใช้งานได้ดี" },
+      { "name": "Google Analytics", "level": "พื้นฐาน" },
+      { "name": "Meta Business Suite", "level": "ใช้งานได้ดี" },
+      { "name": "Excel / Google Sheets", "level": "ใช้งานได้ดี" }
+    ],
+    "talents": [
+      "ถ่ายภาพและตัดต่อวิดีโอสั้นสำหรับโซเชียลมีเดีย",
+      "เขียนแคปชันภาษาไทยและอังกฤษ",
+      "นำเสนองานหน้าชั้นและงานประชุม"
+    ],
+    "contacts": [
+      { "label": "อีเมล", "value": "chonnipha.demo@example.com", "href": "mailto:chonnipha.demo@example.com" },
+      { "label": "โทรศัพท์", "value": "08x-xxx-xxxx" },
+      { "label": "LinkedIn", "value": "linkedin.com/in/demo", "href": "https://linkedin.com/in/demo" }
+    ]
+  }
+]

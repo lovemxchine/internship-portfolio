@@ -1,0 +1,157 @@
+/* ---------------------------------------------------------------
+   Design tokens — แก้สี ฟอนต์ ระยะ ที่ไฟล์นี้ที่เดียว
+   โทน: อบอุ่น เป็นกันเอง (ครีม / ส้มอิฐ / เขียวใบไม้)
+--------------------------------------------------------------- */
+:root {
+  /* พื้นผิว */
+  --bg: #fdf8f2;
+  --surface: #ffffff;
+  --surface-2: #f6efe6;
+  --line: #ebdfd1;
+
+  /* ตัวอักษร */
+  --ink: #3b3029;
+  --ink-soft: #7a6b5d;
+
+  /* สีหลัก */
+  --accent: #c4633f;
+  --accent-ink: #ffffff;
+  --accent-soft: #fbeae2;
+  --leaf: #6f8f6a;
+  --leaf-soft: #eaf1e7;
+
+  /* รูปทรง */
+  --r-sm: 10px;
+  --r: 16px;
+  --r-lg: 24px;
+  --r-pill: 999px;
+
+  --shadow: 0 1px 2px rgba(94, 66, 41, .04), 0 8px 24px -12px rgba(94, 66, 41, .18);
+  --shadow-lg: 0 2px 4px rgba(94, 66, 41, .05), 0 18px 44px -18px rgba(94, 66, 41, .28);
+
+  /* ระยะ */
+  --gap: 1rem;
+  --pad-page: clamp(1.15rem, 4vw, 2rem);
+  --maxw: 1080px;
+  --maxw-text: 68ch;
+
+  /* ตัวอักษร */
+  --font-display: "IBM Plex Sans Thai", "Bai Jamjuree", system-ui, sans-serif;
+  --font-body: "Sarabun", system-ui, -apple-system, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1d1815;
+    --surface: #272019;
+    --surface-2: #322a22;
+    --line: #3d332a;
+    --ink: #f2e9df;
+    --ink-soft: #b3a294;
+    --accent: #e08a63;
+    --accent-ink: #241a14;
+    --accent-soft: #3a2820;
+    --leaf: #9dbd97;
+    --leaf-soft: #2a332a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px -12px rgba(0, 0, 0, .55);
+    --shadow-lg: 0 2px 4px rgba(0, 0, 0, .35), 0 18px 44px -18px rgba(0, 0, 0, .65);
+  }
+}
+
+/* --------------------------- base --------------------------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p { margin: 0; }
+
+img { max-width: 100%; height: auto; display: block; }
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ------------------------ utilities ------------------------ */
+.page {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--pad-page);
+}
+
+.stack > * + * { margin-top: var(--gap); }
+
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.lede {
+  color: var(--ink-soft);
+  max-width: var(--maxw-text);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+}
+
+.chip {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: .8rem;
+  font-weight: 500;
+  padding: .18rem .7rem;
+  border-radius: var(--r-pill);
+  background: var(--leaf-soft);
+  color: var(--leaf);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
