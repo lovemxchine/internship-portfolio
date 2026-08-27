@@ -30,9 +30,9 @@
   --shadow-photo: 0 2px 4px rgba(150, 110, 125, .07), 0 10px 24px -14px rgba(150, 110, 125, .35);
   --shadow-lift: 0 4px 8px rgba(150, 110, 125, .1), 0 22px 40px -20px rgba(150, 110, 125, .42);
 
-  --font-display: "Mali", "Sarabun", sans-serif;
-  --font-body: "Sarabun", system-ui, sans-serif;
-  --font-hand: "Mali", "Sarabun", cursive;
+  --font-display: "Mali", "IBM Plex Sans Thai Looped", sans-serif;
+  --font-body: "IBM Plex Sans Thai Looped", system-ui, sans-serif;
+  --font-hand: "Mali", cursive;
 
   --pad-page: clamp(1.15rem, 4vw, 2.25rem);
   --maxw: 1140px;
