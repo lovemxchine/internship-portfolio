@@ -10,37 +10,72 @@ const s = entry.data;
 
 <Base title="สรุปผลการฝึกงาน" description={s.gained}>
   <div class="page narrow">
-    <SectionHead eyebrow="บทสรุป" title="สรุปผลการฝึกงาน" />
+    <SectionHead eyebrow="หน้าสุดท้ายของสมุด" title="สรุปผลการฝึกงาน" />
 
-    <section class="card blk">
-      <h2>สิ่งที่ได้รับจากการฝึกงาน</h2>
-      <p>{s.gained}</p>
+    <section class="blk">
+      <h2 class="hd">สิ่งที่ได้รับจากการฝึกงาน</h2>
+      <p class="txt">{s.gained}</p>
     </section>
 
-    <section class="card blk">
-      <h2>ทักษะที่พัฒนา</h2>
-      <ul class="bullets">{s.skillsDeveloped.map((x) => <li>{x}</li>)}</ul>
+    <section class="blk">
+      <h2 class="hd">ทักษะที่พัฒนา</h2>
+      <ul class="ticks">{s.skillsDeveloped.map((x) => <li>{x}</li>)}</ul>
     </section>
 
-    <section class="card blk">
-      <h2>ความประทับใจ</h2>
-      <p>{s.impression}</p>
+    <section class="blk">
+      <h2 class="hd">ความประทับใจ</h2>
+      <blockquote class="quote">{s.impression}</blockquote>
     </section>
 
-    <section class="card blk leaf">
-      <h2>ข้อเสนอแนะ</h2>
-      <p>{s.suggestion}</p>
+    <section class="note sheet taped">
+      <h2 class="hd small">ข้อเสนอแนะ</h2>
+      <p class="hand">{s.suggestion}</p>
     </section>
   </div>
 </Base>
 
 <style>
-  .narrow { max-width: 780px; }
-  .blk { padding: 1.25rem 1.4rem 1.45rem; }
-  .blk + .blk { margin-top: 1rem; }
-  .blk h2 { font-size: 1.02rem; color: var(--accent); margin-bottom: .55rem; }
-  .blk.leaf { background: var(--leaf-soft); border-color: transparent; }
-  .blk.leaf h2 { color: var(--leaf); }
-  .bullets { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .35rem; }
-  .bullets li::marker { color: var(--leaf); }
+  .narrow { max-width: 720px; padding-bottom: 3rem; }
+
+  .blk { margin-bottom: 2.2rem; }
+  .hd {
+    font-size: 1.2rem;
+    margin-bottom: .7rem;
+    position: relative;
+    padding-bottom: .3rem;
+  }
+  .hd::after {
+    content: "";
+    position: absolute; left: 0; bottom: 0;
+    width: 2.4rem; height: 2.5px;
+    background: var(--ink-red); opacity: .7; rotate: -.7deg;
+  }
+  .hd.small { font-size: 1.02rem; }
+  .txt { color: var(--ink-2); }
+
+  .ticks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
+  .ticks li { position: relative; padding-left: 1.6rem; color: var(--ink-2); }
+  .ticks li::before {
+    content: "✓";
+    position: absolute; left: 0; top: -.05em;
+    font-family: var(--font-hand); color: var(--ink-green); font-size: 1.05rem;
+  }
+
+  .quote {
+    margin: 0;
+    padding-left: 1.3rem;
+    border-left: 3px solid var(--ink-red);
+    font-family: var(--font-display);
+    font-size: 1.08rem;
+    line-height: 1.75;
+    color: var(--ink);
+  }
+
+  .note {
+    padding: 1.5rem 1.5rem 1.6rem;
+    rotate: -.8deg;
+    margin-top: 3rem;
+    background: color-mix(in srgb, var(--ink-green) 8%, var(--paper-2));
+  }
+  .note .hand { font-size: 1.02rem; color: var(--ink-2); }
 </style>

@@ -21,55 +21,57 @@ const base = import.meta.env.BASE_URL;
 
 <Base title={`สัปดาห์ที่ ${w.weekNumber} · ${w.title}`} description={w.assignment}>
   <article class="page narrow">
-    <p class="crumb"><a href={`${base}weeks`}>← ผลงานรายสัปดาห์</a></p>
+    <p class="crumb"><a href={`${base}weeks`}>← กลับไปหน้าสารบัญ</a></p>
 
     <header class="head">
-      <span class="badge">สัปดาห์ที่ {w.weekNumber}</span>
+      <span class="bignum" aria-hidden="true">{String(w.weekNumber).padStart(2, "0")}</span>
+      <p class="label">สัปดาห์ที่ {w.weekNumber} · {formatRange(w.dateStart, w.dateEnd)}</p>
       <h1>{w.title}</h1>
-      <p class="date">{formatRange(w.dateStart, w.dateEnd)}</p>
     </header>
 
-    <section class="card blk">
-      <h2>งานที่ได้รับมอบหมาย</h2>
-      <p>{w.assignment}</p>
+    <hr class="rule" />
+
+    <section class="blk">
+      <h2 class="hd">งานที่ได้รับมอบหมาย</h2>
+      <p class="txt">{w.assignment}</p>
     </section>
 
-    <section class="card blk">
-      <h2>ขั้นตอนการทำงาน</h2>
+    <section class="blk">
+      <h2 class="hd">ขั้นตอนการทำงาน</h2>
       <ol class="steps">{w.steps.map((s) => <li>{s}</li>)}</ol>
     </section>
 
-    <section class="photos">
-      <h2>ภาพประกอบ</h2>
+    <section class="blk">
+      <h2 class="hd">ภาพจากหน้างาน</h2>
       <PhotoGrid photos={w.photos} />
     </section>
 
-    <section class="card blk leaf">
-      <h2>สิ่งที่ได้เรียนรู้</h2>
-      <p>{w.learned}</p>
+    <section class="learn sheet taped tape-left">
+      <h2 class="hd small">สิ่งที่ได้เรียนรู้</h2>
+      <p class="hand">{w.learned}</p>
     </section>
 
     <div class="pair">
-      <section class="card blk">
-        <h2>ปัญหาที่พบ</h2>
-        <p>{w.problem}</p>
+      <section class="blk pb">
+        <h2 class="hd small"><span class="mk red">ปัญหาที่พบ</span></h2>
+        <p class="txt">{w.problem}</p>
       </section>
-      <section class="card blk">
-        <h2>วิธีแก้ไขปัญหา</h2>
-        <p>{w.solution}</p>
+      <section class="blk pb">
+        <h2 class="hd small"><span class="mk green">วิธีแก้ไข</span></h2>
+        <p class="txt">{w.solution}</p>
       </section>
     </div>
 
     <nav class="pager" aria-label="สัปดาห์ก่อนหน้าและถัดไป">
       {prev ? (
         <a class="pg" href={`${base}weeks/${prev.id}`}>
-          <span>← สัปดาห์ที่ {prev.data.weekNumber}</span>
+          <span class="dir">← สัปดาห์ที่ {prev.data.weekNumber}</span>
           <strong>{prev.data.title}</strong>
         </a>
       ) : <span />}
       {next ? (
         <a class="pg right" href={`${base}weeks/${next.id}`}>
-          <span>สัปดาห์ที่ {next.data.weekNumber} →</span>
+          <span class="dir">สัปดาห์ที่ {next.data.weekNumber} →</span>
           <strong>{next.data.title}</strong>
         </a>
       ) : <span />}
@@ -78,51 +80,121 @@ const base = import.meta.env.BASE_URL;
 </Base>
 
 <style>
-  .narrow { max-width: 820px; }
-  .crumb { padding-top: 1.4rem; font-size: .9rem; }
-  .crumb a { color: var(--accent); text-decoration: none; font-family: var(--font-display); font-weight: 500; }
+  .narrow { max-width: 820px; padding-bottom: 3rem; }
+  .crumb { padding-top: 1.6rem; font-size: .9rem; }
+  .crumb a { font-family: var(--font-hand); color: var(--ink-red); text-decoration: none; }
 
-  .head { padding-block: 1rem 1.5rem; }
-  .badge {
-    display: inline-block; font-family: var(--font-display); font-size: .78rem; font-weight: 600;
-    background: var(--accent); color: var(--accent-ink);
-    padding: .2rem .8rem; border-radius: var(--r-pill); margin-bottom: .6rem;
+  .head { position: relative; padding-block: 1.4rem .4rem; }
+  .bignum {
+    position: absolute;
+    right: -.5rem;
+    top: .2rem;
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 15vw, 8.5rem);
+    font-weight: 700;
+    line-height: .82;
+    color: var(--ink-red);
+    opacity: .1;
+    pointer-events: none;
   }
-  .head h1 { font-size: clamp(1.5rem, 4.5vw, 2.1rem); }
-  .date { color: var(--ink-soft); font-size: .92rem; margin-top: .3rem; }
+  .head h1 { font-size: clamp(1.7rem, 5vw, 2.5rem); margin-top: .35rem; max-width: 20ch; }
 
-  .blk { padding: 1.2rem 1.35rem 1.35rem; }
-  .blk + .blk, .photos + .blk, .blk + .pair, .photos { margin-top: 1rem; }
-  .blk h2, .photos h2 { font-size: 1rem; color: var(--accent); margin-bottom: .55rem; }
-  .blk.leaf { background: var(--leaf-soft); border-color: transparent; }
-  .blk.leaf h2 { color: var(--leaf); }
+  .blk { margin-bottom: 2.1rem; }
+  .hd {
+    font-size: 1.16rem;
+    margin-bottom: .65rem;
+    position: relative;
+    padding-bottom: .3rem;
+  }
+  .hd::after {
+    content: "";
+    position: absolute; left: 0; bottom: 0;
+    width: 2.4rem; height: 2.5px;
+    background: var(--ink-red); opacity: .7; rotate: -.7deg;
+  }
+  .hd.small { font-size: 1.02rem; }
+  .hd.small::after { display: none; }
 
-  .steps { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: .4rem; }
-  .steps li::marker { color: var(--accent); font-family: var(--font-display); font-weight: 600; }
+  /* ไฮไลต์ปากกาเมจิก — ระบายบนตัวอักษรโดยตรง */
+  .mk {
+    display: inline-block;
+    padding-inline: .3rem;
+    rotate: -.6deg;
+    background-repeat: no-repeat;
+    background-size: 100% 88%;
+    background-position: 0 78%;
+  }
+  .mk.red {
+    background-image: linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--ink-red) 30%, transparent) 0%,
+      color-mix(in srgb, var(--ink-red) 22%, transparent) 88%,
+      transparent 100%
+    );
+  }
+  .mk.green {
+    background-image: linear-gradient(
+      95deg,
+      color-mix(in srgb, var(--ink-green) 38%, transparent) 0%,
+      color-mix(in srgb, var(--ink-green) 26%, transparent) 90%,
+      transparent 100%
+    );
+  }
 
-  .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1rem; }
-  .pair .blk { margin-top: 0; }
+  .txt { color: var(--ink-2); }
+
+  .steps { list-style: none; counter-reset: st; margin: 0; padding: 0; }
+  .steps li {
+    counter-increment: st;
+    position: relative;
+    padding-left: 2.2rem;
+    margin-bottom: .7rem;
+    color: var(--ink-2);
+  }
+  .steps li::before {
+    content: counter(st);
+    position: absolute; left: 0; top: .1em;
+    width: 1.55rem; height: 1.55rem;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-size: .82rem; font-weight: 600;
+    color: var(--ink-red);
+    border: 1.5px solid var(--ink-red);
+    border-radius: 50%;
+    opacity: .85;
+  }
+
+  .learn {
+    padding: 1.5rem 1.55rem 1.6rem;
+    rotate: -.7deg;
+    margin: 2.6rem 0 2.4rem;
+    background: color-mix(in srgb, var(--ink-blue) 7%, var(--paper-2));
+  }
+  .learn .hand { font-size: 1.03rem; color: var(--ink-2); }
+
+  .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1.6rem; }
+  .pb { margin-bottom: 1rem; }
 
   .pager {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: .8rem;
-    margin-top: 1.8rem;
+    gap: 1rem;
+    margin-top: 2.4rem;
+    padding-top: 1.6rem;
+    border-top: 1px dashed var(--rule);
   }
   .pg {
-    display: flex; flex-direction: column; gap: .15rem;
-    padding: .85rem 1rem;
-    border: 1px solid var(--line); border-radius: var(--r);
-    background: var(--surface); text-decoration: none; color: inherit;
-    transition: border-color .18s ease;
+    display: flex; flex-direction: column; gap: .1rem;
+    text-decoration: none; color: inherit;
+    transition: translate .18s ease;
   }
-  .pg:hover { border-color: var(--accent); }
-  .pg span { font-family: var(--font-display); font-size: .82rem; color: var(--accent); }
-  .pg strong { font-size: .92rem; font-weight: 500; }
+  .pg:hover { translate: -3px 0; }
+  .pg.right:hover { translate: 3px 0; }
+  .dir { font-family: var(--font-hand); font-size: .85rem; color: var(--ink-red); }
+  .pg strong { font-family: var(--font-display); font-size: .95rem; font-weight: 500; color: var(--ink-2); }
   .pg.right { text-align: right; }
 
   @media (max-width: 620px) {
-    .pager { grid-template-columns: 1fr; }
+    .pager { grid-template-columns: 1fr; gap: 1.2rem; }
     .pg.right { text-align: left; }
   }
 </style>

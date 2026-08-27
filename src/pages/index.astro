@@ -15,38 +15,50 @@ const base = import.meta.env.BASE_URL;
 ---
 
 <Base title="หน้าแรก" description={p.intro}>
-  <section class="hero">
-    <div class="page hero-inner">
-      <div class="hero-text stack">
-        <p class="eyebrow">บันทึกผลงานการฝึกงาน</p>
+  <section class="page cover">
+    <div class="cover-grid">
+      <div class="left">
+        <p class="label">บันทึกผลงานการฝึกงาน</p>
         <h1>{p.fullName}</h1>
-        <p class="role">{p.department} · {p.company}</p>
-        <p class="intro lede">{p.intro}</p>
-        <dl class="facts">
+
+        <p class="posting">
+          <span>{p.department}</span>
+          <span class="at">ที่</span>
+          <span class="co">{p.company}</span>
+        </p>
+
+        <p class="intro">{p.intro}</p>
+
+        <p class="cta">
+          <a class="stamp" href={`${base}weeks`}>เปิดบันทึกรายสัปดาห์</a>
+          <a class="stamp outline" href={`${base}profile`}>ประวัติส่วนตัว</a>
+        </p>
+      </div>
+
+      <figure class="portrait polaroid taped tape-right">
+        <Image src={p.avatar} alt={`รูปของ ${p.fullName}`} widths={[300, 600]} sizes="(max-width: 880px) 55vw, 290px" />
+        <figcaption>{p.fullName.split(" ")[0]} · {p.studentId}</figcaption>
+      </figure>
+
+      <aside class="slip sheet">
+        <dl>
           <div><dt>รหัสนักศึกษา</dt><dd>{p.studentId}</dd></div>
           <div><dt>ระยะเวลาฝึกงาน</dt><dd>{p.periodLabel}</dd></div>
           <div><dt>บันทึกแล้ว</dt><dd>{weeks.length} สัปดาห์</dd></div>
         </dl>
-        <p class="cta">
-          <a class="btn" href={`${base}weeks`}>ดูผลงานรายสัปดาห์</a>
-          <a class="btn ghost" href={`${base}profile`}>ประวัติส่วนตัว</a>
-        </p>
-      </div>
-
-      <div class="hero-photo">
-        <Image src={p.avatar} alt={`รูปของ ${p.fullName}`} widths={[320, 640]} sizes="(max-width: 860px) 60vw, 320px" />
-      </div>
+      </aside>
     </div>
   </section>
 
   <section class="page latest">
+    <hr class="rule" />
     <div class="latest-head">
       <h2>บันทึกล่าสุด</h2>
-      <a class="all" href={`${base}weeks`}>ดูทั้งหมด →</a>
+      <a class="all" href={`${base}weeks`}>ดูครบทุกสัปดาห์ →</a>
     </div>
     <div class="cards">
       {
-        latest.map((w) => (
+        latest.map((w, i) => (
           <WeekCard
             href={`${base}weeks/${w.id}`}
             weekNumber={w.data.weekNumber}
@@ -56,6 +68,7 @@ const base = import.meta.env.BASE_URL;
             photoCount={w.data.photos.length}
             cover={w.data.photos[0].src}
             coverAlt={w.data.photos[0].caption}
+            index={i}
           />
         ))
       }
@@ -64,76 +77,95 @@ const base = import.meta.env.BASE_URL;
 </Base>
 
 <style>
-  .hero { background: linear-gradient(180deg, var(--accent-soft), transparent 70%); }
-  .hero-inner {
+  .cover { padding-block: clamp(1.8rem, 6vw, 3.6rem) 1rem; }
+  .cover-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr);
-    gap: clamp(1.5rem, 5vw, 3rem);
-    align-items: center;
-    padding-block: clamp(2rem, 7vw, 4.2rem);
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr);
+    grid-template-areas:
+      "text photo"
+      "text slip";
+    grid-template-rows: auto 1fr;
+    column-gap: clamp(1.6rem, 5vw, 3.4rem);
+    row-gap: 1.6rem;
+    align-items: start;
   }
-  .hero-text h1 { font-size: clamp(1.9rem, 6vw, 3rem); }
-  .role { font-family: var(--font-display); font-weight: 500; color: var(--accent); }
-  .intro { font-size: 1.02rem; }
+  .left { grid-area: text; }
+  .portrait { grid-area: photo; }
+  .slip { grid-area: slip; }
 
-  .facts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .6rem 2rem;
-    margin: 0;
-    padding-top: .3rem;
+  h1 {
+    font-size: clamp(2.1rem, 7.2vw, 3.7rem);
+    font-weight: 700;
+    margin-block: .3rem .55rem;
+    line-height: 1.2;
   }
-  .facts div { display: flex; flex-direction: column; }
-  .facts dt {
+
+  .posting {
     font-family: var(--font-display);
-    font-size: .72rem;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
+    font-size: clamp(1rem, 2.4vw, 1.16rem);
+    color: var(--ink-2);
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 1.1rem;
+    display: inline-block;
   }
-  .facts dd { margin: 0; font-weight: 600; }
+  .at { color: var(--ink-3); padding-inline: .3rem; font-style: italic; }
+  .co { color: var(--ink-red); font-weight: 600; }
 
-  .cta { display: flex; gap: .6rem; flex-wrap: wrap; padding-top: .5rem; }
-  .btn {
+  .intro { color: var(--ink-2); max-width: 42ch; }
+
+  .cta { display: flex; gap: 1rem; flex-wrap: wrap; padding-top: 1.6rem; }
+
+  .portrait { rotate: 1.7deg; margin: 0 0 0 auto; max-width: 290px; width: 100%; }
+  .portrait img { aspect-ratio: 1; object-fit: cover; }
+
+  .slip { padding: 1rem 1.15rem; rotate: -1deg; }
+  .slip dl { margin: 0; display: flex; flex-direction: column; gap: .7rem; }
+  .slip div { display: flex; flex-direction: column; }
+  .slip dt {
+    font-size: .7rem;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .slip dd {
+    margin: 0;
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: .95rem;
-    text-decoration: none;
-    padding: .62rem 1.25rem;
-    border-radius: var(--r-pill);
-    background: var(--accent);
-    color: var(--accent-ink);
-    border: 1px solid var(--accent);
-    transition: transform .16s ease, box-shadow .16s ease;
-  }
-  .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-  .btn.ghost { background: transparent; color: var(--accent); }
-
-  .hero-photo :global(img) {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: var(--r-lg);
-    box-shadow: var(--shadow-lg);
-    border: 5px solid var(--surface);
-    rotate: 2deg;
+    font-size: .98rem;
+    line-height: 1.4;
   }
 
-  .latest { padding-block: clamp(1.5rem, 5vw, 2.5rem); }
+  .latest { padding-block: 1.2rem 2rem; }
   .latest-head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.3rem;
   }
-  .latest-head h2 { font-size: 1.35rem; }
-  .all { font-family: var(--font-display); font-size: .9rem; font-weight: 600; color: var(--accent); text-decoration: none; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 1.1rem; }
+  .latest-head h2 { font-size: 1.5rem; }
+  .all { font-family: var(--font-display); font-size: .93rem; font-weight: 600; color: var(--ink-red); text-decoration: none; }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
+    gap: 2rem 1.6rem;
+  }
 
-  @media (max-width: 860px) {
-    .hero-inner { grid-template-columns: 1fr; }
-    .hero-photo { order: -1; max-width: 220px; }
-    .hero-photo :global(img) { rotate: 0deg; }
+  /* มือถือ: รูปก่อน แล้วชื่อ แล้วค่อยกล่องข้อมูล */
+  @media (max-width: 880px) {
+    .cover-grid {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "photo"
+        "text"
+        "slip";
+      grid-template-rows: auto;
+      row-gap: 1.5rem;
+    }
+    .portrait { margin: 0; max-width: 200px; rotate: -1.6deg; }
+    .slip { rotate: .8deg; }
+    .cta { padding-top: 1.2rem; }
   }
 </style>

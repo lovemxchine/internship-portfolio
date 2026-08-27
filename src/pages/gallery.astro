@@ -6,62 +6,65 @@ import SectionHead from "../components/SectionHead.astro";
 
 const items = await getCollection("gallery");
 const categories = ["ทั้งหมด", "การทำงาน", "การประชุม", "กิจกรรมบริษัท", "ผลงานที่ภาคภูมิใจ"];
+const tilts = [-1.9, 1.3, -0.8, 1.7, -1.4, 0.9, -1.1, 1.5];
 ---
 
 <Base title="แกลเลอรี" description="รวมภาพและวิดีโอกิจกรรมระหว่างการฝึกงาน">
   <div class="page">
     <SectionHead
-      eyebrow="แกลเลอรี"
-      title="ภาพและวิดีโอกิจกรรม"
-      lede="รวมบรรยากาศการทำงาน การประชุม กิจกรรมบริษัท และผลงานที่ภาคภูมิใจ กดที่ภาพเพื่อดูขนาดเต็ม"
+      eyebrow="ภาพติดสมุด"
+      title="แกลเลอรี"
+      lede="บรรยากาศการทำงาน การประชุม กิจกรรมบริษัท และผลงานที่ภาคภูมิใจ กดที่ภาพเพื่อดูขนาดเต็ม"
     />
 
     <div class="filters" role="group" aria-label="กรองตามหมวด">
       {
         categories.map((c, i) => (
-          <button type="button" class:list={["fbtn", { on: i === 0 }]} data-cat={c}>
+          <button
+            type="button"
+            class:list={["fbtn", { on: i === 0 }]}
+            data-cat={c}
+            style={`--tilt:${(i % 2 ? 1 : -1) * (0.6 + (i % 3) * 0.3)}deg`}
+          >
             {c}
           </button>
         ))
       }
     </div>
 
-    <div class="grid">
+    <div class="wall">
       {
-        items.map((item) => {
+        items.map((item, i) => {
           const d = item.data;
+          const tilt = `--tilt:${tilts[i % tilts.length]}deg`;
+          const tapeCls = i % 3 === 0 ? "tape-left" : i % 3 === 1 ? "" : "tape-right";
+
           if (d.kind === "photo") {
             return (
-              <figure class="tile card" data-cat={d.category}>
+              <figure class:list={["tile", "polaroid", "taped", tapeCls]} style={tilt} data-cat={d.category}>
                 <button type="button" class="open" data-full={d.src.src} data-cap={d.caption}>
-                  <Image src={d.src} alt={d.caption} widths={[360, 720]} sizes="(max-width: 700px) 50vw, 320px" />
+                  <Image src={d.src} alt={d.caption} widths={[380, 760]} sizes="(max-width: 720px) 88vw, 290px" />
                   <span class="sr-only">ดูภาพขนาดเต็ม: {d.caption}</span>
                 </button>
-                <figcaption>
-                  <span class="chip">{d.category}</span>
-                  <span>{d.caption}</span>
-                </figcaption>
+                <figcaption>{d.caption}</figcaption>
               </figure>
             );
           }
 
           if (d.kind === "video-upload") {
             return (
-              <figure class="tile card wide" data-cat={d.category}>
+              <figure class:list={["tile", "polaroid", "taped", "wide", tapeCls]} style={tilt} data-cat={d.category}>
                 <video controls preload="none" poster={d.poster?.src} playsinline>
                   <source src={d.file} type="video/mp4" />
                   เบราว์เซอร์ของคุณไม่รองรับการเล่นวิดีโอ
                 </video>
-                <figcaption>
-                  <span class="chip">{d.category}</span>
-                  <span>{d.caption}</span>
-                </figcaption>
+                <figcaption>{d.caption}</figcaption>
               </figure>
             );
           }
 
           return (
-            <figure class="tile card wide" data-cat={d.category}>
+            <figure class:list={["tile", "polaroid", "taped", "wide", tapeCls]} style={tilt} data-cat={d.category}>
               <div class="ratio">
                 <iframe
                   src={`https://www.youtube-nocookie.com/embed/${d.youtubeId}`}
@@ -71,20 +74,21 @@ const categories = ["ทั้งหมด", "การทำงาน", "กา
                   allowfullscreen
                 />
               </div>
-              <figcaption>
-                <span class="chip">{d.category}</span>
-                <span>{d.caption}</span>
-              </figcaption>
+              <figcaption>{d.caption}</figcaption>
             </figure>
           );
         })
       }
     </div>
 
+    <p class="empty hand" hidden>ยังไม่มีภาพในหมวดนี้</p>
+
     <dialog id="lb">
       <form method="dialog"><button class="x" aria-label="ปิด">✕</button></form>
-      <img id="lb-img" alt="" />
-      <p id="lb-cap"></p>
+      <div class="lb-frame">
+        <img id="lb-img" alt="" />
+        <p id="lb-cap" class="hand"></p>
+      </div>
     </dialog>
   </div>
 </Base>
@@ -104,89 +108,99 @@ const categories = ["ทั้งหมด", "การทำงาน", "กา
     });
   });
 
-  // คลิกพื้นหลังเพื่อปิด
   dlg?.addEventListener("click", (e) => {
     if (e.target === dlg) dlg.close();
   });
 
   const tiles = document.querySelectorAll<HTMLElement>(".tile");
+  const empty = document.querySelector<HTMLElement>(".empty");
   document.querySelectorAll<HTMLButtonElement>(".fbtn").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".fbtn").forEach((b) => b.classList.remove("on"));
       btn.classList.add("on");
       const cat = btn.dataset.cat;
+      let shown = 0;
       tiles.forEach((t) => {
-        t.hidden = cat !== "ทั้งหมด" && t.dataset.cat !== cat;
+        const hide = cat !== "ทั้งหมด" && t.dataset.cat !== cat;
+        t.hidden = hide;
+        if (!hide) shown++;
       });
+      if (empty) empty.hidden = shown > 0;
     });
   });
 </script>
 
 <style>
-  .filters { display: flex; flex-wrap: wrap; gap: .45rem; padding-bottom: 1.1rem; }
+  .filters { display: flex; flex-wrap: wrap; gap: .6rem; padding-bottom: 1.6rem; }
   .fbtn {
     font-family: var(--font-display);
-    font-size: .86rem;
-    padding: .38rem .95rem;
-    border-radius: var(--r-pill);
-    border: 1px solid var(--line);
-    background: var(--surface);
-    color: var(--ink-soft);
+    font-size: .89rem;
+    font-weight: 500;
+    padding: .32rem .85rem;
+    border: 1.5px solid var(--rule);
+    border-radius: 1px;
+    background: var(--paper-2);
+    color: var(--ink-2);
     cursor: pointer;
-    transition: background .16s ease, color .16s ease, border-color .16s ease;
+    rotate: var(--tilt, 0deg);
+    box-shadow: 2px 2px 0 rgba(60, 46, 28, .08);
+    transition: color .16s ease, border-color .16s ease, translate .12s ease;
   }
-  .fbtn:hover { border-color: var(--accent); color: var(--ink); }
-  .fbtn.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  .fbtn:hover { color: var(--ink); border-color: var(--ink-2); translate: -1px -1px; }
+  .fbtn.on {
+    background: var(--ink-red);
+    border-color: var(--ink-red);
+    color: var(--paper-2);
+    box-shadow: 2px 2px 0 rgba(47, 42, 36, .2);
+  }
 
-  .grid {
+  .wall {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
-    gap: 1rem;
-    padding-bottom: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 218px), 1fr));
+    gap: 2.2rem 1.4rem;
+    padding-bottom: 2.5rem;
+    align-items: start;
   }
-  .tile { margin: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .tile { rotate: var(--tilt); margin: 0; }
   .tile[hidden] { display: none; }
   .tile.wide { grid-column: span 2; }
   @media (max-width: 560px) { .tile.wide { grid-column: span 1; } }
 
-  .open {
-    display: block; padding: 0; border: 0; background: none; cursor: zoom-in; width: 100%;
-  }
-  .open :global(img) { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; transition: transform .3s ease; }
-  .open:hover :global(img) { transform: scale(1.04); }
+  .open { display: block; padding: 0; border: 0; background: none; cursor: zoom-in; width: 100%; }
+  .open :global(img) { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 
-  video { width: 100%; aspect-ratio: 16 / 9; background: #000; display: block; }
-  .ratio { position: relative; aspect-ratio: 16 / 9; background: #000; }
+  video { width: 100%; aspect-ratio: 16 / 9; background: #171310; display: block; }
+  .ratio { position: relative; aspect-ratio: 16 / 9; background: #171310; }
   .ratio iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 
-  figcaption {
-    padding: .7rem .85rem .85rem;
-    font-size: .87rem;
-    color: var(--ink-soft);
-    display: flex;
-    flex-direction: column;
-    gap: .3rem;
-    align-items: flex-start;
-  }
+  .empty { padding: 1rem 0 3rem; color: var(--ink-3); }
 
   dialog {
     border: 0;
-    border-radius: var(--r);
     padding: 0;
-    background: var(--surface);
-    color: var(--ink);
-    max-width: min(92vw, 1000px);
-    max-height: 92vh;
-    overflow: hidden;
+    background: transparent;
+    max-width: min(93vw, 960px);
+    max-height: 93vh;
+    overflow: visible;
   }
-  dialog::backdrop { background: rgba(30, 20, 12, .72); backdrop-filter: blur(3px); }
-  dialog img { width: 100%; max-height: 78vh; object-fit: contain; background: var(--surface-2); }
-  dialog p { padding: .8rem 1rem 1rem; font-size: .9rem; color: var(--ink-soft); }
+  dialog::backdrop { background: rgba(36, 27, 18, .8); }
+  .lb-frame {
+    background: var(--paper-2);
+    padding: 13px 13px 0;
+    border: 1px solid var(--paper-edge);
+    box-shadow: var(--shadow-lift);
+    rotate: -.6deg;
+  }
+  .lb-frame img { width: 100%; max-height: 76vh; object-fit: contain; background: var(--paper-edge); }
+  .lb-frame p { padding: .75rem .3rem 1rem; font-size: .93rem; text-align: center; color: var(--ink-2); }
   .x {
-    position: absolute; right: .6rem; top: .6rem; z-index: 2;
-    width: 36px; height: 36px; border-radius: 50%;
-    border: 0; cursor: pointer;
-    background: var(--surface); color: var(--ink);
-    box-shadow: var(--shadow); font-size: 1rem;
+    position: absolute; right: -12px; top: -14px; z-index: 2;
+    width: 38px; height: 38px;
+    border: 1.5px solid var(--paper-edge);
+    cursor: pointer;
+    background: var(--paper-2); color: var(--ink);
+    box-shadow: var(--shadow-photo);
+    font-size: .95rem;
+    rotate: 4deg;
   }
 </style>

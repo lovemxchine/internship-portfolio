@@ -9,19 +9,16 @@ const weeks = (await getCollection("weeks")).sort((a, b) => a.data.weekNumber - 
 const base = import.meta.env.BASE_URL;
 ---
 
-<Base
-  title="ผลงานรายสัปดาห์"
-  description={`บันทึกผลงานการฝึกงานทั้งหมด ${weeks.length} สัปดาห์`}
->
+<Base title="ผลงานรายสัปดาห์" description={`บันทึกผลงานการฝึกงานทั้งหมด ${weeks.length} สัปดาห์`}>
   <div class="page">
     <SectionHead
-      eyebrow="ผลงานรายสัปดาห์"
-      title={`บันทึกทั้งหมด ${weeks.length} สัปดาห์`}
-      lede="แต่ละสัปดาห์บันทึกงานที่ได้รับมอบหมาย ขั้นตอนการทำงาน สิ่งที่ได้เรียนรู้ ปัญหาที่พบและวิธีแก้ไข พร้อมภาพประกอบ กดที่การ์ดเพื่อดูรายละเอียด"
+      eyebrow={`ทั้งหมด ${weeks.length} สัปดาห์`}
+      title="บันทึกรายสัปดาห์"
+      lede="แต่ละหน้าบันทึกงานที่ได้รับมอบหมาย ขั้นตอนการทำงาน สิ่งที่ได้เรียนรู้ ปัญหาที่พบและวิธีแก้ไข พร้อมภาพจากหน้างานจริง"
     />
     <div class="cards">
       {
-        weeks.map((w) => (
+        weeks.map((w, i) => (
           <WeekCard
             href={`${base}weeks/${w.id}`}
             weekNumber={w.data.weekNumber}
@@ -31,6 +28,7 @@ const base = import.meta.env.BASE_URL;
             photoCount={w.data.photos.length}
             cover={w.data.photos[0].src}
             coverAlt={w.data.photos[0].caption}
+            index={i}
           />
         ))
       }
@@ -41,8 +39,8 @@ const base = import.meta.env.BASE_URL;
 <style>
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
-    gap: 1.1rem;
-    padding-bottom: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 275px), 1fr));
+    gap: 2.4rem 1.7rem;
+    padding-bottom: 3rem;
   }
 </style>

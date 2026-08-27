@@ -10,12 +10,12 @@ const p = profile.data;
 
 <Base title="ประวัติส่วนตัว" description={`ประวัติการศึกษา ทักษะ และช่องทางติดต่อของ ${p.fullName}`}>
   <div class="page">
-    <SectionHead eyebrow="ประวัติส่วนตัว" title="ประวัติและทักษะ" lede={p.intro} />
+    <SectionHead eyebrow="ทำความรู้จัก" title="ประวัติและทักษะ" lede={p.intro} />
 
-    <div class="cols">
-      <section class="card box">
-        <h2>ประวัติการศึกษา</h2>
-        <ol class="timeline">
+    <div class="layout">
+      <section class="edu">
+        <h2 class="hd">ประวัติการศึกษา</h2>
+        <ol class="tl">
           {p.education.map((e) => (
             <li>
               <span class="yr">{e.year}</span>
@@ -23,60 +23,119 @@ const p = profile.data;
             </li>
           ))}
         </ol>
-      </section>
 
-      <section class="card box">
-        <h2>ทักษะ</h2>
-        <ul class="skills">
-          {p.skills.map((s) => (
-            <li><span>{s.name}</span><span class="chip">{s.level}</span></li>
-          ))}
-        </ul>
-      </section>
-
-      <section class="card box">
-        <h2>ความสามารถพิเศษ</h2>
-        <ul class="bullets">
+        <h2 class="hd sp">ความสามารถพิเศษ</h2>
+        <ul class="ticks">
           {p.talents.map((t) => <li>{t}</li>)}
         </ul>
       </section>
 
-      <section class="card box">
-        <h2>ช่องทางติดต่อ</h2>
-        <ul class="contacts">
-          {p.contacts.map((c) => (
-            <li>
-              <span class="lbl">{c.label}</span>
-              {c.href ? <a href={c.href}>{c.value}</a> : <span>{c.value}</span>}
-            </li>
-          ))}
-        </ul>
-      </section>
+      <aside class="side">
+        <section class="sheet card">
+          <h2 class="hd">ทักษะ</h2>
+          <ul class="skills">
+            {p.skills.map((s) => (
+              <li><span class="nm">{s.name}</span><span class="lv hand">{s.level}</span></li>
+            ))}
+          </ul>
+        </section>
+
+        <section class="sheet card contact">
+          <h2 class="hd">ติดต่อ</h2>
+          <ul class="contacts">
+            {p.contacts.map((c) => (
+              <li>
+                <span class="lbl">{c.label}</span>
+                {c.href ? <a href={c.href}>{c.value}</a> : <span>{c.value}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </aside>
     </div>
   </div>
 </Base>
 
 <style>
-  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 1.1rem; }
-  .box { padding: 1.25rem 1.35rem 1.4rem; }
-  .box h2 { font-size: 1.05rem; margin-bottom: .8rem; color: var(--accent); }
-
-  .timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .9rem; }
-  .timeline li { display: flex; flex-direction: column; padding-left: 1rem; border-left: 2px solid var(--line); }
-  .yr { font-family: var(--font-display); font-size: .8rem; color: var(--ink-soft); }
-  .dt { font-size: .96rem; }
-
-  .skills { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
-  .skills li { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
-
-  .bullets { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: .35rem; }
-  .bullets li::marker { color: var(--leaf); }
-
-  .contacts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
-  .contacts li { display: flex; gap: .8rem; align-items: baseline; flex-wrap: wrap; }
-  .lbl {
-    font-family: var(--font-display); font-size: .74rem; letter-spacing: .1em;
-    text-transform: uppercase; color: var(--ink-soft); min-width: 5.5rem;
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+    gap: clamp(1.6rem, 4.5vw, 3rem);
+    align-items: start;
+    padding-bottom: 2.5rem;
   }
-  .contacts a { color: var(--accent); }
+
+  .hd {
+    font-size: 1.22rem;
+    margin-bottom: .9rem;
+    position: relative;
+    padding-bottom: .3rem;
+  }
+  .hd::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 2.6rem; height: 2.5px;
+    background: var(--ink-red);
+    opacity: .7;
+    rotate: -.7deg;
+  }
+  .sp { margin-top: 2.4rem; }
+
+  .tl { list-style: none; margin: 0; padding: 0; }
+  .tl li {
+    position: relative;
+    padding-left: 1.5rem;
+    padding-bottom: 1.4rem;
+    border-left: 1.5px dashed var(--rule);
+  }
+  .tl li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .tl li::before {
+    content: "";
+    position: absolute;
+    left: -6px; top: .62em;
+    width: 10px; height: 10px;
+    background: var(--paper);
+    border: 2px solid var(--ink-red);
+    border-radius: 50%;
+  }
+  .yr { display: block; font-family: var(--font-hand); font-size: .87rem; color: var(--ink-red); }
+  .dt { display: block; font-size: 1rem; }
+
+  .ticks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .55rem; }
+  .ticks li { position: relative; padding-left: 1.5rem; color: var(--ink-2); }
+  .ticks li::before {
+    content: "✓";
+    position: absolute; left: 0; top: -.05em;
+    font-family: var(--font-hand);
+    color: var(--ink-green);
+    font-size: 1.05rem;
+  }
+
+  .side { display: flex; flex-direction: column; gap: 1.5rem; }
+  .card { padding: 1.2rem 1.35rem 1.4rem; rotate: -.7deg; }
+  .contact { rotate: .8deg; }
+
+  .skills { list-style: none; margin: 0; padding: 0; }
+  .skills li {
+    display: flex; align-items: baseline; justify-content: space-between; gap: .8rem;
+    padding: .5rem 0;
+    border-bottom: 1px dotted var(--rule);
+  }
+  .skills li:last-child { border-bottom: 0; padding-bottom: 0; }
+  .nm { font-family: var(--font-display); font-weight: 500; }
+  .lv { font-size: .85rem; color: var(--ink-green); white-space: nowrap; }
+
+  .contacts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
+  .contacts li { display: flex; gap: .7rem; align-items: baseline; flex-wrap: wrap; }
+  .lbl {
+    font-size: .69rem; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--ink-3); min-width: 4.6rem;
+  }
+  .contacts a { color: var(--ink-blue); text-underline-offset: 3px; }
+
+  @media (max-width: 840px) {
+    .layout { grid-template-columns: 1fr; }
+    .card, .contact { rotate: 0deg; }
+  }
 </style>

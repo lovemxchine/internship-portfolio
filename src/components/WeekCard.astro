@@ -9,50 +9,67 @@ interface Props {
   photoCount: number;
   cover: ImageMetadata;
   coverAlt: string;
+  index?: number;
 }
-const { href, weekNumber, title, dateLabel, assignment, photoCount, cover, coverAlt } = Astro.props;
+const { href, weekNumber, title, dateLabel, assignment, photoCount, cover, coverAlt, index = 0 } = Astro.props;
+// เอียงไม่เท่ากันทีละใบ ไม่ให้ดูเป็นกริดโรงงาน
+const tilts = [-1.4, 0.9, -0.5, 1.5, -1.1, 0.6];
+const tilt = tilts[index % tilts.length];
 ---
-<a class="wc card" href={href}>
-  <div class="thumb">
-    <Image src={cover} alt={coverAlt} widths={[320, 640]} sizes="(max-width: 700px) 100vw, 340px" />
-    <span class="badge">สัปดาห์ที่ {weekNumber}</span>
-  </div>
+<a class="wc" href={href} style={`--tilt:${tilt}deg`}>
+  <span class="num" aria-hidden="true">{String(weekNumber).padStart(2, "0")}</span>
+  <figure class="polaroid taped">
+    <Image src={cover} alt={coverAlt} widths={[340, 680]} sizes="(max-width: 720px) 92vw, 330px" />
+    <figcaption>{photoCount} ภาพในสัปดาห์นี้</figcaption>
+  </figure>
   <div class="body">
     <p class="date">{dateLabel}</p>
     <h2>{title}</h2>
     <p class="excerpt">{assignment}</p>
-    <p class="more"><span class="chip">{photoCount} ภาพ</span><span class="go">อ่านต่อ →</span></p>
+    <p class="more">อ่านบันทึกสัปดาห์นี้ →</p>
   </div>
 </a>
 
 <style>
   .wc {
+    position: relative;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    gap: .9rem;
     text-decoration: none;
     color: inherit;
-    transition: transform .2s ease, box-shadow .2s ease;
+    rotate: var(--tilt);
+    transition: rotate .3s cubic-bezier(.2,.8,.3,1);
+    padding-top: .6rem;
   }
-  .wc:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-  .thumb { position: relative; aspect-ratio: 3 / 2; background: var(--surface-2); }
-  .thumb :global(img) { width: 100%; height: 100%; object-fit: cover; }
-  .badge {
-    position: absolute; left: .7rem; top: .7rem;
-    font-family: var(--font-display); font-size: .78rem; font-weight: 600;
-    background: var(--accent); color: var(--accent-ink);
-    padding: .2rem .7rem; border-radius: var(--r-pill);
+  .wc:hover { rotate: 0deg; }
+  .wc:hover .polaroid { transform: scale(1.015); box-shadow: var(--shadow-lift); }
+
+  .num {
+    position: absolute;
+    top: -.7rem;
+    right: -.15rem;
+    z-index: 4;
+    font-family: var(--font-display);
+    font-size: 3.2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink-red);
+    opacity: .17;
+    pointer-events: none;
   }
-  .body { padding: 1rem 1.1rem 1.15rem; display: flex; flex-direction: column; gap: .35rem; flex: 1; }
-  .date { font-size: .82rem; color: var(--ink-soft); }
-  .body h2 { font-size: 1.06rem; }
+
+  .polaroid img { aspect-ratio: 4 / 3; object-fit: cover; }
+
+  .body { display: flex; flex-direction: column; gap: .28rem; padding-inline: .2rem; }
+  .date { font-family: var(--font-hand); font-size: .88rem; color: var(--ink-red); }
+  .body h2 { font-size: 1.18rem; }
   .excerpt {
-    color: var(--ink-soft); font-size: .92rem;
+    color: var(--ink-2); font-size: .93rem;
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
   }
   .more {
-    margin-top: auto; padding-top: .6rem;
-    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    font-family: var(--font-display); font-weight: 600;
+    font-size: .9rem; color: var(--ink-red); padding-top: .2rem;
   }
-  .go { font-family: var(--font-display); font-size: .88rem; font-weight: 600; color: var(--accent); }
 </style>

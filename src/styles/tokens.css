@@ -1,72 +1,66 @@
 /* ---------------------------------------------------------------
-   Design tokens — แก้สี ฟอนต์ ระยะ ที่ไฟล์นี้ที่เดียว
-   โทน: อบอุ่น เป็นกันเอง (ครีม / ส้มอิฐ / เขียวใบไม้)
+   สมุดบันทึกฝึกงาน — กระดาษ หมึก เทปกาว ลายมือ
+   แก้สี ฟอนต์ ระยะ ที่ไฟล์นี้ที่เดียว
 --------------------------------------------------------------- */
 :root {
-  /* พื้นผิว */
-  --bg: #fdf8f2;
-  --surface: #ffffff;
-  --surface-2: #f6efe6;
-  --line: #ebdfd1;
+  /* กระดาษ */
+  --paper: #f7f1e4;
+  --paper-2: #fdfaf3;
+  --paper-edge: #e6dcc6;
 
-  /* ตัวอักษร */
-  --ink: #3b3029;
-  --ink-soft: #7a6b5d;
+  /* หมึก */
+  --ink: #2f2a24;
+  --ink-2: #6b6154;
+  --ink-3: #9b9081;
 
-  /* สีหลัก */
-  --accent: #c4633f;
-  --accent-ink: #ffffff;
-  --accent-soft: #fbeae2;
-  --leaf: #6f8f6a;
-  --leaf-soft: #eaf1e7;
+  /* ปากกา */
+  --ink-red: #a8402c;
+  --ink-blue: #35526b;
+  --ink-green: #5f7350;
 
-  /* รูปทรง */
-  --r-sm: 10px;
-  --r: 16px;
-  --r-lg: 24px;
-  --r-pill: 999px;
+  /* เทปกาว */
+  --tape: rgba(214, 196, 150, .55);
+  --tape-2: rgba(196, 176, 150, .42);
 
-  --shadow: 0 1px 2px rgba(94, 66, 41, .04), 0 8px 24px -12px rgba(94, 66, 41, .18);
-  --shadow-lg: 0 2px 4px rgba(94, 66, 41, .05), 0 18px 44px -18px rgba(94, 66, 41, .28);
+  --rule: #ddd2ba;
 
-  /* ระยะ */
-  --gap: 1rem;
-  --pad-page: clamp(1.15rem, 4vw, 2rem);
-  --maxw: 1080px;
-  --maxw-text: 68ch;
+  --shadow-photo: 0 1px 1px rgba(60, 46, 28, .12), 0 10px 20px -12px rgba(60, 46, 28, .35);
+  --shadow-lift: 0 2px 3px rgba(60, 46, 28, .13), 0 22px 38px -20px rgba(60, 46, 28, .45);
 
-  /* ตัวอักษร */
-  --font-display: "IBM Plex Sans Thai", "Bai Jamjuree", system-ui, sans-serif;
-  --font-body: "Sarabun", system-ui, -apple-system, sans-serif;
+  --font-display: "Trirong", Georgia, serif;
+  --font-body: "Sarabun", system-ui, sans-serif;
+  --font-hand: "Sriracha", "Sarabun", cursive;
+
+  --pad-page: clamp(1.15rem, 4vw, 2.25rem);
+  --maxw: 1140px;
+  --maxw-text: 64ch;
+
+  /* เนื้อกระดาษ — ไม่ใช่ gradient */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.34'/%3E%3C/svg%3E");
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1d1815;
-    --surface: #272019;
-    --surface-2: #322a22;
-    --line: #3d332a;
-    --ink: #f2e9df;
-    --ink-soft: #b3a294;
-    --accent: #e08a63;
-    --accent-ink: #241a14;
-    --accent-soft: #3a2820;
-    --leaf: #9dbd97;
-    --leaf-soft: #2a332a;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px -12px rgba(0, 0, 0, .55);
-    --shadow-lg: 0 2px 4px rgba(0, 0, 0, .35), 0 18px 44px -18px rgba(0, 0, 0, .65);
+    --paper: #201c18;
+    --paper-2: #2a251f;
+    --paper-edge: #3a332b;
+    --ink: #ece4d7;
+    --ink-2: #b0a696;
+    --ink-3: #8a8071;
+    --ink-red: #d98368;
+    --ink-blue: #8fb0c9;
+    --ink-green: #a3b894;
+    --tape: rgba(120, 105, 78, .5);
+    --tape-2: rgba(110, 96, 78, .4);
+    --rule: #3d3529;
+    --shadow-photo: 0 1px 1px rgba(0, 0, 0, .4), 0 10px 22px -12px rgba(0, 0, 0, .7);
+    --shadow-lift: 0 2px 4px rgba(0, 0, 0, .45), 0 22px 40px -20px rgba(0, 0, 0, .8);
   }
 }
 
-/* --------------------------- base --------------------------- */
-*,
-*::before,
-*::after { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
+*, *::before, *::after { box-sizing: border-box; }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: .001ms !important;
     transition-duration: .001ms !important;
@@ -75,75 +69,157 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--paper);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.75;
+  font-size: 16.5px;
+  line-height: 1.8;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  position: relative;
+}
+
+/* เนื้อกระดาษคลุมทั้งหน้า */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: var(--grain);
+  opacity: .5;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 1;
+}
+@media (prefers-color-scheme: dark) {
+  body::before { mix-blend-mode: overlay; opacity: .3; }
 }
 
 h1, h2, h3, h4 {
   font-family: var(--font-display);
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.35;
   margin: 0;
   text-wrap: balance;
+  letter-spacing: -.005em;
 }
 
 p { margin: 0; }
-
 img { max-width: 100%; height: auto; display: block; }
-
 a { color: inherit; }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ink-red);
   outline-offset: 3px;
-  border-radius: 4px;
 }
 
-/* ------------------------ utilities ------------------------ */
+/* ------------------------ ส่วนประกอบร่วม ------------------------ */
 .page {
   width: 100%;
   max-width: var(--maxw);
   margin-inline: auto;
   padding-inline: var(--pad-page);
+  position: relative;
+  z-index: 2;
 }
 
-.stack > * + * { margin-top: var(--gap); }
-
-.eyebrow {
-  font-family: var(--font-display);
-  font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--accent);
+/* ป้ายเขียนมือ */
+.hand {
+  font-family: var(--font-hand);
+  font-weight: 400;
+  color: var(--ink-2);
+  line-height: 1.6;
 }
 
-.lede {
-  color: var(--ink-soft);
-  max-width: var(--maxw-text);
+/* หัวข้อย่อยแบบเขียนกำกับ */
+.label {
+  font-family: var(--font-hand);
+  font-size: .95rem;
+  color: var(--ink-red);
+  display: inline-block;
+  transform: rotate(-1.2deg);
 }
 
-.card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  box-shadow: var(--shadow);
+/* เส้นคั่นแบบขีดมือ ไม่ใช่ hairline */
+.rule {
+  height: 7px;
+  border: 0;
+  margin: 2.2rem 0;
+  background: no-repeat center/100% 7px
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='7' preserveAspectRatio='none'%3E%3Cpath d='M2 4.4C90 2.2 160 5.6 250 3.4S420 1.6 520 4.8c30 1 60-.6 78-1.4' fill='none' stroke='%23c9bda1' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");
+  opacity: .9;
 }
 
-.chip {
+/* กระดาษหนึ่งแผ่น */
+.sheet {
+  background: var(--paper-2);
+  border: 1px solid var(--paper-edge);
+  border-radius: 2px;
+  box-shadow: var(--shadow-photo);
+  position: relative;
+}
+
+/* เทปกาวมุมบน — ใช้กับ .sheet หรือ .polaroid */
+.taped::after {
+  content: "";
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 92px;
+  height: 24px;
+  translate: -50% 0;
+  rotate: -2.4deg;
+  background: var(--tape);
+  box-shadow: 0 1px 2px rgba(60, 46, 28, .14);
+  clip-path: polygon(3% 0, 97% 4%, 100% 96%, 2% 100%);
+  pointer-events: none;
+}
+.taped.tape-left::after { left: 30px; translate: 0 0; rotate: -7deg; }
+.taped.tape-right::after { left: auto; right: 26px; translate: 0 0; rotate: 6deg; background: var(--tape-2); }
+
+/* รูปแบบโพลารอยด์ */
+.polaroid {
+  background: var(--paper-2);
+  padding: 11px 11px 0;
+  border: 1px solid var(--paper-edge);
+  box-shadow: var(--shadow-photo);
+  position: relative;
+  transition: transform .28s cubic-bezier(.2, .8, .3, 1), box-shadow .28s ease;
+}
+.polaroid img { width: 100%; display: block; background: var(--paper-edge); }
+.polaroid figcaption {
+  font-family: var(--font-hand);
+  font-size: .9rem;
+  color: var(--ink-2);
+  padding: .6rem .3rem .9rem;
+  line-height: 1.5;
+  text-align: center;
+}
+.polaroid:hover { transform: rotate(0deg) scale(1.015); box-shadow: var(--shadow-lift); z-index: 3; }
+
+/* ปุ่มแบบปั๊มหมึก ไม่ใช่ pill */
+.stamp {
   display: inline-block;
   font-family: var(--font-display);
-  font-size: .8rem;
-  font-weight: 500;
-  padding: .18rem .7rem;
-  border-radius: var(--r-pill);
-  background: var(--leaf-soft);
-  color: var(--leaf);
+  font-weight: 600;
+  font-size: .98rem;
+  text-decoration: none;
+  padding: .5rem 1.35rem;
+  color: var(--paper-2);
+  background: var(--ink-red);
+  border: 0;
+  border-radius: 1px;
+  rotate: -.6deg;
+  box-shadow: 3px 3px 0 rgba(47, 42, 36, .22);
+  transition: translate .14s ease, box-shadow .14s ease;
+}
+.stamp:hover { translate: -1px -1px; box-shadow: 5px 5px 0 rgba(47, 42, 36, .24); }
+.stamp:active { translate: 2px 2px; box-shadow: 1px 1px 0 rgba(47, 42, 36, .22); }
+.stamp.outline {
+  background: transparent;
+  color: var(--ink-red);
+  border: 1.5px solid var(--ink-red);
+  box-shadow: 3px 3px 0 rgba(168, 64, 44, .16);
+  rotate: .7deg;
 }
 
 .sr-only {
