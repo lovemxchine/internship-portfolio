@@ -18,9 +18,6 @@
   --ink-blue: #7fa8c9;  /* ฟ้าอ่อน */
   --ink-green: #8fba9c; /* เขียวมิ้นต์ */
 
-  /* ริบบิ้น/เทป */
-  --tape: rgba(240, 200, 210, .7);
-  --tape-2: rgba(205, 225, 235, .65);
 
   --rule: #f0dfe1;
 
@@ -50,8 +47,6 @@
     --ink-red: #eda2b6;
     --ink-blue: #a4c6e0;
     --ink-green: #a9d3b5;
-    --tape: rgba(190, 140, 155, .4);
-    --tape-2: rgba(140, 165, 180, .35);
     --rule: #453c46;
     --shadow-photo: 0 2px 4px rgba(0, 0, 0, .3), 0 10px 24px -14px rgba(0, 0, 0, .6);
     --shadow-lift: 0 4px 8px rgba(0, 0, 0, .35), 0 22px 40px -20px rgba(0, 0, 0, .7);
@@ -161,22 +156,6 @@ a { color: inherit; }
   position: relative;
 }
 
-/* ริบบิ้นมุมบน */
-.taped::after {
-  content: "";
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  width: 78px;
-  height: 18px;
-  translate: -50% 0;
-  rotate: -2deg;
-  border-radius: 99px;
-  background: var(--tape);
-  pointer-events: none;
-}
-.taped.tape-left::after { left: 26px; translate: 0 0; rotate: -5deg; }
-.taped.tape-right::after { left: auto; right: 24px; translate: 0 0; rotate: 4deg; background: var(--tape-2); }
 
 /* กรอบรูป */
 .polaroid {
@@ -232,3 +211,29 @@ a { color: inherit; }
   white-space: nowrap;
   border: 0;
 }
+
+/* ------------------------ เทปวาชิ (รูปจริงใน public/decor) ------------------------ */
+.taped::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  rotate: -2deg;
+  pointer-events: none;
+  width: 96px;
+  height: 30px;
+  top: -13px;
+  background-color: transparent;
+  background-image: var(--washi);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  box-shadow: none;
+}
+.taped.tape-left::after  { left: 26px; translate: 0 0; rotate: -5deg; }
+.taped.tape-right::after { left: auto; right: 24px; translate: 0 0; rotate: 4deg; }
+
+.washi-grid  { --washi: url("/internship-portfolio/decor/tape-grid.png"); }
+.washi-berry { --washi: url("/internship-portfolio/decor/tape-berry.png"); }
+.washi-heart { --washi: url("/internship-portfolio/decor/tape-heart.png"); }
+.washi-dot   { --washi: url("/internship-portfolio/decor/tape-dot.png"); }
+.washi-star  { --washi: url("/internship-portfolio/decor/tape-kraft.png"); }

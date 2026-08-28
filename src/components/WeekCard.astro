@@ -13,12 +13,13 @@ interface Props {
 }
 const { href, weekNumber, title, dateLabel, assignment, photoCount, cover, coverAlt, index = 0 } = Astro.props;
 // เอียงไม่เท่ากันทีละใบ ไม่ให้ดูเป็นกริดโรงงาน
+const washi = ["washi-grid","washi-berry","washi-heart","washi-dot","washi-star"];
 const tilts = [-0.7, 0.5, -0.3, 0.8, -0.6, 0.4];
 const tilt = tilts[index % tilts.length];
 ---
 <a class="wc" href={href} style={`--tilt:${tilt}deg`}>
   <span class="num" aria-hidden="true">{String(weekNumber).padStart(2, "0")}</span>
-  <figure class="polaroid taped">
+  <figure class:list={["polaroid","taped", washi[index % washi.length]]}>
     <Image src={cover} alt={coverAlt} widths={[340, 680]} sizes="(max-width: 720px) 92vw, 330px" />
     <figcaption>{photoCount} ภาพในสัปดาห์นี้</figcaption>
   </figure>

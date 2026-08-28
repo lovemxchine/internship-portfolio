@@ -1,14 +1,87 @@
 [
-  { "id": "g1", "kind": "photo", "category": "การทำงาน", "caption": "โต๊ะทำงานในแผนกการตลาดดิจิทัล", "src": "../assets/gallery/g1.jpg" },
-  { "id": "g2", "kind": "photo", "category": "การประชุม", "caption": "ประชุมวางแผนคอนเทนต์ประจำสัปดาห์", "src": "../assets/gallery/g2.jpg" },
-  { "id": "g3", "kind": "photo", "category": "การทำงาน", "caption": "จัดเตรียมภาพสำหรับโพสต์โซเชียลมีเดีย", "src": "../assets/gallery/g3.jpg" },
-  { "id": "g4", "kind": "photo", "category": "กิจกรรมบริษัท", "caption": "กิจกรรมสานสัมพันธ์พนักงานประจำเดือน", "src": "../assets/gallery/g4.jpg" },
-  { "id": "g5", "kind": "photo", "category": "ผลงานที่ภาคภูมิใจ", "caption": "ชุดคอนเทนต์แคมเปญกลางปีที่ได้รับมอบหมาย", "src": "../assets/gallery/g5.jpg" },
-  { "id": "g6", "kind": "photo", "category": "การประชุม", "caption": "นำเสนอผลการวิเคราะห์ให้ทีม", "src": "../assets/gallery/g6.jpg" },
-  { "id": "g7", "kind": "photo", "category": "การทำงาน", "caption": "ตรวจสอบข้อมูลก่อนส่งรายงาน", "src": "../assets/gallery/g7.jpg" },
-  { "id": "g8", "kind": "photo", "category": "กิจกรรมบริษัท", "caption": "อบรมภายในเรื่องเครื่องมือการตลาด", "src": "../assets/gallery/g8.jpg" },
-  { "id": "g9", "kind": "photo", "category": "ผลงานที่ภาคภูมิใจ", "caption": "รายงานสรุปผลแคมเปญฉบับแรกที่ทำเอง", "src": "../assets/gallery/g9.jpg" },
-  { "id": "g10", "kind": "photo", "category": "การทำงาน", "caption": "บรรยากาศการทำงานช่วงบ่าย", "src": "../assets/gallery/g10.jpg" },
-  { "id": "v1", "kind": "video-upload", "category": "การทำงาน", "caption": "ตัวอย่าง — วิดีโอที่อัปโหลดเก็บไว้บนเว็บโดยตรง", "file": "/videos/sample-clip.mp4", "poster": "../assets/gallery/g3.jpg" },
-  { "id": "v2", "kind": "video-youtube", "category": "กิจกรรมบริษัท", "caption": "ตัวอย่าง — วิดีโอที่ใช้วิธีใส่ลิงก์จากภายนอก", "youtubeId": "aqz-KE-bpKQ" }
+  {
+    "id": "g1",
+    "kind": "photo",
+    "category": "การทำงาน",
+    "caption": "บรรยากาศการทำงาน — คำบรรยายภาพที่ 1",
+    "src": "../assets/gallery/g1.jpg"
+  },
+  {
+    "id": "g2",
+    "kind": "photo",
+    "category": "การประชุม",
+    "caption": "บรรยากาศการประชุม — คำบรรยายภาพที่ 2",
+    "src": "../assets/gallery/g2.jpg"
+  },
+  {
+    "id": "g3",
+    "kind": "photo",
+    "category": "การทำงาน",
+    "caption": "บรรยากาศการทำงาน — คำบรรยายภาพที่ 3",
+    "src": "../assets/gallery/g3.jpg"
+  },
+  {
+    "id": "g4",
+    "kind": "photo",
+    "category": "กิจกรรมบริษัท",
+    "caption": "กิจกรรมของหน่วยงาน — คำบรรยายภาพที่ 4",
+    "src": "../assets/gallery/g4.jpg"
+  },
+  {
+    "id": "g5",
+    "kind": "photo",
+    "category": "ผลงานที่ภาคภูมิใจ",
+    "caption": "ผลงานที่ภาคภูมิใจ — คำบรรยายภาพที่ 5",
+    "src": "../assets/gallery/g5.jpg"
+  },
+  {
+    "id": "g6",
+    "kind": "photo",
+    "category": "การประชุม",
+    "caption": "บรรยากาศการประชุม — คำบรรยายภาพที่ 6",
+    "src": "../assets/gallery/g6.jpg"
+  },
+  {
+    "id": "g7",
+    "kind": "photo",
+    "category": "การทำงาน",
+    "caption": "บรรยากาศการทำงาน — คำบรรยายภาพที่ 7",
+    "src": "../assets/gallery/g7.jpg"
+  },
+  {
+    "id": "g8",
+    "kind": "photo",
+    "category": "กิจกรรมบริษัท",
+    "caption": "กิจกรรมของหน่วยงาน — คำบรรยายภาพที่ 8",
+    "src": "../assets/gallery/g8.jpg"
+  },
+  {
+    "id": "g9",
+    "kind": "photo",
+    "category": "ผลงานที่ภาคภูมิใจ",
+    "caption": "ผลงานที่ภาคภูมิใจ — คำบรรยายภาพที่ 9",
+    "src": "../assets/gallery/g9.jpg"
+  },
+  {
+    "id": "g10",
+    "kind": "photo",
+    "category": "การทำงาน",
+    "caption": "บรรยากาศการทำงาน — คำบรรยายภาพที่ 10",
+    "src": "../assets/gallery/g10.jpg"
+  },
+  {
+    "id": "v1",
+    "kind": "video-upload",
+    "category": "การทำงาน",
+    "caption": "บรรยากาศการทำงาน — คำบรรยายภาพที่ 11",
+    "file": "/videos/sample-clip.mp4",
+    "poster": "../assets/gallery/g3.jpg"
+  },
+  {
+    "id": "v2",
+    "kind": "video-youtube",
+    "category": "กิจกรรมบริษัท",
+    "caption": "กิจกรรมของหน่วยงาน — คำบรรยายภาพที่ 12",
+    "youtubeId": "aqz-KE-bpKQ"
+  }
 ]

@@ -6,6 +6,7 @@ import SectionHead from "../components/SectionHead.astro";
 
 const items = await getCollection("gallery");
 const categories = ["ทั้งหมด", "การทำงาน", "การประชุม", "กิจกรรมบริษัท", "ผลงานที่ภาคภูมิใจ"];
+const washi = ["washi-grid","washi-berry","washi-heart","washi-dot","washi-star"];
 const tilts = [-0.9, 0.6, -0.4, 0.8, -0.7, 0.5, -0.5, 0.7];
 ---
 
@@ -37,7 +38,7 @@ const tilts = [-0.9, 0.6, -0.4, 0.8, -0.7, 0.5, -0.5, 0.7];
         items.map((item, i) => {
           const d = item.data;
           const tilt = `--tilt:${tilts[i % tilts.length]}deg`;
-          const tapeCls = i % 3 === 0 ? "tape-left" : i % 3 === 1 ? "" : "tape-right";
+          const tapeCls = `${i % 3 === 0 ? "tape-left" : i % 3 === 1 ? "" : "tape-right"} ${washi[i % washi.length]}`;
 
           if (d.kind === "photo") {
             return (

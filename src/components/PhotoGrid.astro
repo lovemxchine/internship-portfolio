@@ -2,12 +2,13 @@
 import { Image } from "astro:assets";
 interface Props { photos: { src: ImageMetadata; caption: string }[]; }
 const { photos } = Astro.props;
+const washi = ["washi-grid","washi-berry","washi-heart","washi-dot","washi-star"];
 const tilts = [-0.9, 0.6, -0.4, 0.8, -0.7, 0.5];
 ---
 <div class="wall">
   {photos.map((p, i) => (
     <figure
-      class:list={["polaroid", "taped", i % 3 === 0 ? "tape-left" : i % 3 === 1 ? "" : "tape-right"]}
+      class:list={["polaroid", "taped", i % 3 === 0 ? "tape-left" : i % 3 === 1 ? "" : "tape-right", washi[i % washi.length]]}
       style={`--tilt:${tilts[i % tilts.length]}deg`}
     >
       <Image src={p.src} alt={p.caption} widths={[420, 840]} sizes="(max-width: 720px) 88vw, 300px" />
