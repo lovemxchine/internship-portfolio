@@ -33,7 +33,7 @@ const weeks = defineCollection({
 
 /** ประวัติส่วนตัว — มีชุดเดียว */
 const profile = defineCollection({
-  loader: file("./src/content/profile.json"),
+  loader: file("./src/content/profile.json", { parser: (t: string) => [JSON.parse(t)] }),
   schema: ({ image }) =>
     z.object({
       id: z.string(),
@@ -53,7 +53,7 @@ const profile = defineCollection({
 
 /** แกลเลอรี — รูปหรือวิดีโอลอย ไม่ผูกสัปดาห์ */
 const gallery = defineCollection({
-  loader: file("./src/content/gallery.json"),
+  loader: file("./src/content/gallery.json", { parser: (t: string) => JSON.parse(t).items }),
   schema: ({ image }) =>
     z.discriminatedUnion("kind", [
       z.object({
@@ -84,7 +84,7 @@ const gallery = defineCollection({
 
 /** สรุปผลการฝึกงาน — มีชุดเดียว */
 const summary = defineCollection({
-  loader: file("./src/content/summary.json"),
+  loader: file("./src/content/summary.json", { parser: (t: string) => [JSON.parse(t)] }),
   schema: z.object({
     id: z.string(),
     gained: z.string(),
