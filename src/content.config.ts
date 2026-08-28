@@ -1,5 +1,5 @@
 import { defineCollection, z } from "astro:content";
-import { file, glob } from "astro/loaders";
+import { file } from "astro/loaders";
 
 /**
  * โครงข้อมูลทั้งหมดของเว็บ — หลังบ้าน (Pages CMS) จะมาแก้ไฟล์ชุดนี้ตรง ๆ ในเฟสถัดไป
@@ -15,12 +15,13 @@ const weekPhoto = ({ image }: { image: () => z.ZodType }) =>
 
 /** ผลงานรายสัปดาห์ — 1 ไฟล์ = 1 สัปดาห์ */
 const weeks = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "./src/content/weeks" }),
+  loader: file("./src/content/weeks.json", { parser: (t: string) => JSON.parse(t).items }),
   schema: ({ image }) =>
     z.object({
+      id: z.string(),
       weekNumber: z.number().int().positive(),
-      dateStart: z.date(),
-      dateEnd: z.date(),
+      dateStart: z.coerce.date(),
+      dateEnd: z.coerce.date(),
       title: z.string(),
       assignment: z.string(),
       steps: z.array(z.string()).min(1),
