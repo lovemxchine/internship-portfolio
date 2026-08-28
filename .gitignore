@@ -25,6 +25,3 @@ pnpm-debug.log*
 
 # local
 /.claude/
-
-# ต้องใช้ token ที่มีสิทธิ์ workflow ถึงจะ push ได้ — ดู README
-.github/workflows/
