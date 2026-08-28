@@ -6,9 +6,13 @@ import sitemap from "@astrojs/sitemap";
 const SITE = "https://lovemxchine.github.io";
 const BASE = "/internship-portfolio";
 
+// ตอน dev เสิร์ฟที่ / เฉย ๆ จะได้ไม่ต้องพิมพ์ path ยาว
+// ตอน build ใช้ BASE จริงเพราะ GitHub Pages เป็น project site
+const isBuild = process.env.NODE_ENV === "production";
+
 export default defineConfig({
   site: SITE,
-  base: BASE,
+  base: isBuild ? BASE : "/",
   trailingSlash: "ignore",
   integrations: [sitemap()],
   image: { responsiveStyles: true },
