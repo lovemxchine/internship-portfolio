@@ -16,7 +16,7 @@ export const getStaticPaths = (async () => {
 
 const { week, prev, next } = Astro.props;
 const w = week.data;
-const base = import.meta.env.BASE_URL;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 ---
 
 <Base title={`สัปดาห์ที่ ${w.weekNumber} · ${w.title}`} description={w.assignment}>

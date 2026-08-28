@@ -6,7 +6,7 @@ import WeekCard from "../../components/WeekCard.astro";
 import { formatRange } from "../../lib/date";
 
 const weeks = (await getCollection("weeks")).sort((a, b) => a.data.weekNumber - b.data.weekNumber);
-const base = import.meta.env.BASE_URL;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 ---
 
 <Base title="ผลงานรายสัปดาห์" description={`บันทึกผลงานการฝึกงานทั้งหมด ${weeks.length} สัปดาห์`}>
