@@ -322,7 +322,9 @@ export const mountAdmin = (): void => {
         $("#ghlogin").addEventListener("click", loginWithGitHub);
       } else {
         $("#tokbox").hidden = false;
-        $<HTMLButtonElement>("#signin").className = "stamp";
+        const b = $<HTMLButtonElement>("#signin");
+        b.className = "stamp";
+        b.textContent = "เข้าสู่ระบบ";
       }
       const saved = localStorage.getItem(TOKEN_KEY);
       if (saved) { token = saved; start().catch(() => localStorage.removeItem(TOKEN_KEY)); }

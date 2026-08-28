@@ -64,6 +64,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 
     <style is:global>
       body { background: var(--paper); }
+      [hidden] { display: none !important; }
       .bar { border-bottom: 1px solid var(--rule); background: var(--paper-2); position: sticky; top: 0; z-index: 5; }
       .bar-in { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: .8rem; }
       .bar strong { font-family: var(--font-display); }
