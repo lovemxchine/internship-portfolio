@@ -1,6 +1,7 @@
 import type { Collection, Field } from "./schema";
 
-interface Cfg { collections: Collection[]; repo: string; branch: string; uploadDir: string }
+interface Settings { repo: string; branch: string; uploadDir: string; authUrl: string }
+interface Cfg extends Settings { collections: Collection[] }
 type Row = Record<string, unknown>;
 interface FileState { sha: string; data: Row | Row[] }
 
@@ -285,19 +286,56 @@ const start = async (): Promise<void> => {
   renderPanel(cfg.collections[0]);
 };
 
+/** เข้าสู่ระบบด้วย GitHub ผ่าน Worker — เปิด popup แล้วรอ token กลับมา */
+const loginWithGitHub = (): void => {
+  const popup = window.open(`${cfg.authUrl}/auth`, "gh-login", "width=720,height=760");
+  const onMsg = (ev: MessageEvent): void => {
+    const d = ev.data as { source?: string; token?: string | null; error?: string | null };
+    if (d?.source !== "ipf-admin-auth") return;
+    window.removeEventListener("message", onMsg);
+    popup?.close();
+    if (!d.token) { showLoginError(d.error ?? "ไม่ได้รับโทเคนจาก GitHub"); return; }
+    token = d.token;
+    start()
+      .then(() => localStorage.setItem(TOKEN_KEY, token))
+      .catch((e: unknown) => showLoginError(String(e)));
+  };
+  window.addEventListener("message", onMsg);
+};
+
+const showLoginError = (msg: string): void => {
+  const err = $("#loginerr");
+  err.textContent = `เข้าสู่ระบบไม่สำเร็จ — ${msg}`;
+  err.hidden = false;
+};
+
 export const mountAdmin = (): void => {
-  cfg = JSON.parse($("#cfg").textContent ?? "{}") as Cfg;
+  const collections = JSON.parse($("#cfg").textContent ?? "[]") as Collection[];
+  const base = document.querySelector<HTMLMetaElement>('meta[name="ipf-base"]')?.content ?? "/";
+
+  void fetch(`${base}admin/settings.json`)
+    .then((r) => r.json() as Promise<Settings>)
+    .then((s) => {
+      cfg = { ...s, collections };
+      if (cfg.authUrl) {
+        $("#ghlogin").hidden = false;
+        $("#ghlogin").addEventListener("click", loginWithGitHub);
+      } else {
+        $("#tokbox").hidden = false;
+        $<HTMLButtonElement>("#signin").className = "stamp";
+      }
+      const saved = localStorage.getItem(TOKEN_KEY);
+      if (saved) { token = saved; start().catch(() => localStorage.removeItem(TOKEN_KEY)); }
+    })
+    .catch(() => showLoginError("โหลด settings.json ไม่ได้"));
 
   $<HTMLButtonElement>("#signin").addEventListener("click", () => {
+    if ($("#tokbox").hidden) { $("#tokbox").hidden = false; return; }
     token = $<HTMLInputElement>("#tok").value.trim();
     if (!token) return;
     start()
       .then(() => localStorage.setItem(TOKEN_KEY, token))
-      .catch((e: unknown) => {
-        const err = $("#loginerr");
-        err.textContent = `เข้าสู่ระบบไม่สำเร็จ — ตรวจว่าโทเคนถูกต้องและมีสิทธิ์ Contents บน repo นี้ (${String(e)})`;
-        err.hidden = false;
-      });
+      .catch((e: unknown) => showLoginError(`ตรวจว่าโทเคนถูกต้องและมีสิทธิ์ Contents บน repo นี้ (${String(e)})`));
   });
 
   $("#logout").addEventListener("click", () => {
@@ -305,9 +343,4 @@ export const mountAdmin = (): void => {
     location.reload();
   });
 
-  const saved = localStorage.getItem(TOKEN_KEY);
-  if (saved) {
-    token = saved;
-    start().catch(() => { localStorage.removeItem(TOKEN_KEY); });
-  }
 };

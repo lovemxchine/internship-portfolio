@@ -1,7 +1,7 @@
 ---
 import "../../styles/tokens.css";
-import { COLLECTIONS, REPO, BRANCH, UPLOAD_DIR } from "./schema";
-const cfg = { collections: COLLECTIONS, repo: REPO, branch: BRANCH, uploadDir: UPLOAD_DIR };
+import { COLLECTIONS } from "./schema";
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 ---
 
 <html lang="th">
@@ -9,13 +9,14 @@ const cfg = { collections: COLLECTIONS, repo: REPO, branch: BRANCH, uploadDir: U
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
+    <meta name="ipf-base" content={base} />
     <title>จัดการข้อมูล · สมุดบันทึกฝึกงาน</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600&family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&display=swap" />
   </head>
   <body>
-    <script id="cfg" type="application/json" set:html={JSON.stringify(cfg)} is:inline />
+    <script id="cfg" type="application/json" set:html={JSON.stringify(COLLECTIONS)} is:inline />
 
     <header class="bar">
       <div class="page bar-in">
@@ -34,12 +35,15 @@ const cfg = { collections: COLLECTIONS, repo: REPO, branch: BRANCH, uploadDir: U
           ใส่ GitHub Personal Access Token ที่มีสิทธิ์ <code>Contents: Read and write</code>
           บน repo นี้ โทเคนถูกเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ถูกส่งไปที่อื่น
         </p>
+        <div id="tokbox" hidden>
         <label class="fld">
           <span>Personal Access Token</span>
           <input id="tok" type="password" autocomplete="off" placeholder="github_pat_..." />
         </label>
+        </div>
         <p class="row">
-          <button id="signin" class="stamp">เข้าสู่ระบบ</button>
+          <button id="ghlogin" class="stamp" hidden>เข้าสู่ระบบด้วย GitHub</button>
+          <button id="signin" class="stamp outline">ใช้โทเคนแทน</button>
           <a class="muted small" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">สร้างโทเคนใหม่ ↗</a>
         </p>
         <p id="loginerr" class="err" hidden></p>

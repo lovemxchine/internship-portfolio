@@ -117,7 +117,3 @@ export const COLLECTIONS: Collection[] = [
     ],
   },
 ];
-
-export const REPO = "lovemxchine/internship-portfolio";
-export const BRANCH = "main";
-export const UPLOAD_DIR = "src/assets/uploads";
