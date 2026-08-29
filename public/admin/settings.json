@@ -2,5 +2,5 @@
   "repo": "lovemxchine/internship-portfolio",
   "branch": "main",
   "uploadDir": "src/assets/uploads",
-  "authUrl": ""
+  "authUrl": "https://ipf-admin-auth.lovemxchine.workers.dev"
 }

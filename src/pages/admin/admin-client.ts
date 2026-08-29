@@ -5,7 +5,7 @@ interface Cfg extends Settings { collections: Collection[] }
 type Row = Record<string, unknown>;
 interface FileState { sha: string; data: Row | Row[] }
 
-const TOKEN_KEY = "ipf-admin-token";
+const SESSION_KEY = "ipf-admin-session";
 const $ = <T extends HTMLElement>(sel: string): T => {
   const el = document.querySelector<T>(sel);
   if (!el) throw new Error(`ไม่พบ element: ${sel}`);
@@ -13,14 +13,14 @@ const $ = <T extends HTMLElement>(sel: string): T => {
 };
 
 let cfg: Cfg;
-let token = "";
+let session = "";
 const files = new Map<string, FileState>();
 
 /* ---------- GitHub API ---------- */
 const gh = async (path: string, init?: RequestInit): Promise<unknown> => {
-  const res = await fetch(`https://api.github.com${path}`, {
+  const res = await fetch(`${cfg.authUrl}/gh${path}`, {
     ...init,
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", ...(init?.headers ?? {}) },
+    headers: { Authorization: `Bearer ${session}`, ...(init?.headers ?? {}) },
   });
   if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
   return res.json();
@@ -427,21 +427,18 @@ const start = async (): Promise<void> => {
   renderPanel(cfg.collections[0]);
 };
 
-/** เข้าสู่ระบบด้วย GitHub ผ่าน Worker — เปิด popup แล้วรอ token กลับมา */
-const loginWithGitHub = (): void => {
-  const popup = window.open(`${cfg.authUrl}/auth`, "gh-login", "width=720,height=760");
-  const onMsg = (ev: MessageEvent): void => {
-    const d = ev.data as { source?: string; token?: string | null; error?: string | null };
-    if (d?.source !== "ipf-admin-auth") return;
-    window.removeEventListener("message", onMsg);
-    popup?.close();
-    if (!d.token) { showLoginError(d.error ?? "ไม่ได้รับโทเคนจาก GitHub"); return; }
-    token = d.token;
-    start()
-      .then(() => localStorage.setItem(TOKEN_KEY, token))
-      .catch((e: unknown) => showLoginError(String(e)));
-  };
-  window.addEventListener("message", onMsg);
+/** ส่งชื่อผู้ใช้กับรหัสผ่านให้ Worker ตรวจ แล้วรับบัตรผ่านกลับมา */
+const login = async (user: string, pass: string): Promise<void> => {
+  const res = await fetch(`${cfg.authUrl}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user, pass }),
+  });
+  const body = await res.json() as { session?: string; error?: string };
+  if (!res.ok || !body.session) throw new Error(body.error ?? "เข้าสู่ระบบไม่สำเร็จ");
+  session = body.session;
+  await start();
+  localStorage.setItem(SESSION_KEY, session);
 };
 
 const showLoginError = (msg: string): void => {
@@ -458,32 +455,27 @@ export const mountAdmin = (): void => {
     .then((r) => r.json() as Promise<Settings>)
     .then((s) => {
       cfg = { ...s, collections };
-      if (cfg.authUrl) {
-        $("#ghlogin").hidden = false;
-        $("#ghlogin").addEventListener("click", loginWithGitHub);
-      } else {
-        $("#tokbox").hidden = false;
-        const b = $<HTMLButtonElement>("#signin");
-        b.className = "stamp";
-        b.textContent = "เข้าสู่ระบบ";
+      const saved = localStorage.getItem(SESSION_KEY);
+      if (saved) {
+        session = saved;
+        start().catch(() => localStorage.removeItem(SESSION_KEY));
       }
-      const saved = localStorage.getItem(TOKEN_KEY);
-      if (saved) { token = saved; start().catch(() => localStorage.removeItem(TOKEN_KEY)); }
     })
-    .catch(() => showLoginError("โหลด settings.json ไม่ได้"));
+    .catch(() => showLoginError("โหลดการตั้งค่าไม่ได้"));
 
-  $<HTMLButtonElement>("#signin").addEventListener("click", () => {
-    if ($("#tokbox").hidden) { $("#tokbox").hidden = false; return; }
-    token = $<HTMLInputElement>("#tok").value.trim();
-    if (!token) return;
-    start()
-      .then(() => localStorage.setItem(TOKEN_KEY, token))
-      .catch((e: unknown) => showLoginError(`ตรวจว่าโทเคนถูกต้องและมีสิทธิ์ Contents บน repo นี้ (${String(e)})`));
+  const form = $<HTMLFormElement>("#loginform");
+  form.addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const btn = $<HTMLButtonElement>("#signin");
+    btn.disabled = true;
+    $("#loginerr").hidden = true;
+    login($<HTMLInputElement>("#user").value.trim(), $<HTMLInputElement>("#pass").value)
+      .catch((e: unknown) => showLoginError(e instanceof Error ? e.message : String(e)))
+      .finally(() => { btn.disabled = false; });
   });
 
   $("#logout").addEventListener("click", () => {
-    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(SESSION_KEY);
     location.reload();
   });
-
 };

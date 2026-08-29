@@ -31,21 +31,20 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
     <main class="page wrap">
       <section id="login" class="sheet pad">
         <h1>เข้าสู่ระบบ</h1>
-        <p class="muted">
-          ใส่ GitHub Personal Access Token ที่มีสิทธิ์ <code>Contents: Read and write</code>
-          บน repo นี้ โทเคนถูกเก็บไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ถูกส่งไปที่อื่น
-        </p>
-        <div id="tokbox" hidden>
-        <label class="fld">
-          <span>Personal Access Token</span>
-          <input id="tok" type="password" autocomplete="off" placeholder="github_pat_..." />
-        </label>
-        </div>
-        <p class="row">
-          <button id="ghlogin" class="stamp" hidden>เข้าสู่ระบบด้วย GitHub</button>
-          <button id="signin" class="stamp outline">ใช้โทเคนแทน</button>
-          <a class="muted small" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">สร้างโทเคนใหม่ ↗</a>
-        </p>
+        <p class="muted">ใส่ชื่อผู้ใช้และรหัสผ่านที่ได้รับตอนส่งมอบเว็บไซต์</p>
+        <form id="loginform">
+          <label class="fld">
+            <span>ชื่อผู้ใช้</span>
+            <input id="user" type="text" autocomplete="username" required />
+          </label>
+          <label class="fld">
+            <span>รหัสผ่าน</span>
+            <input id="pass" type="password" autocomplete="current-password" required />
+          </label>
+          <p class="row">
+            <button id="signin" class="stamp" type="submit">เข้าสู่ระบบ</button>
+          </p>
+        </form>
         <p id="loginerr" class="err" hidden></p>
       </section>
 

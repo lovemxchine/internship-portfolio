@@ -1,4 +1,5 @@
 import { defineCollection, z } from "astro:content";
+import type { ZodType } from "astro/zod";
 import { file } from "astro/loaders";
 
 /**
@@ -7,7 +8,7 @@ import { file } from "astro/loaders";
  */
 
 /** รูปที่ผูกกับสัปดาห์ — ต่างจาก Gallery Item ตรงที่มีเจ้าของสัปดาห์ชัดเจน */
-const weekPhoto = ({ image }: { image: () => z.ZodType }) =>
+const weekPhoto = ({ image }: { image: () => ZodType }) =>
   z.object({
     src: image(),
     caption: z.string().default(""),
