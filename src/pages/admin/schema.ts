@@ -1,6 +1,10 @@
 /** โครงฟอร์มของหน้า admin — เพิ่ม/แก้ฟิลด์ที่ไฟล์นี้ที่เดียว */
 /** แสดงช่องนี้เฉพาะตอนอีกช่องมีค่าตามที่กำหนด */
-interface ShowWhen { showWhen?: { field: string; equals: string[] } }
+interface ShowWhen {
+  showWhen?: { field: string; equals: string[] };
+  /** half = ช่องสั้น วางคู่กับช่องข้าง ๆ ได้ ไม่กินทั้งแถว */
+  width?: "half";
+}
 
 export type Field =
   | ({ name: string; label: string; type: "text" | "textarea" | "image" | "video" | "number" | "date" } & ShowWhen)
@@ -28,33 +32,33 @@ export const COLLECTIONS: Collection[] = [
     path: "src/content/profile.json",
     shape: "object",
     fields: [
-      { name: "fullName", label: "ชื่อ–สกุล", type: "text" },
-      { name: "studentId", label: "รหัสนักศึกษา", type: "text" },
+      { name: "fullName", label: "ชื่อ–สกุล", type: "text", width: "half" },
+      { name: "studentId", label: "รหัสนักศึกษา", type: "text", width: "half" },
       { name: "avatar", label: "รูปประจำตัว", type: "image" },
-      { name: "company", label: "ชื่อสถานประกอบการ", type: "text" },
-      { name: "department", label: "แผนกที่ฝึกงาน", type: "text" },
-      { name: "periodLabel", label: "ช่วงเวลาฝึกงาน", type: "text" },
+      { name: "company", label: "ชื่อสถานประกอบการ", type: "text", width: "half" },
+      { name: "department", label: "แผนกที่ฝึกงาน", type: "text", width: "half" },
+      { name: "periodLabel", label: "ช่วงเวลาฝึกงาน", type: "text", width: "half" },
       { name: "intro", label: "แนะนำตัว", type: "textarea" },
       {
         name: "education", label: "ประวัติการศึกษา", type: "objects",
         fields: [
-          { name: "year", label: "ช่วงปี", type: "text" },
+          { name: "year", label: "ช่วงปี", type: "text", width: "half" },
           { name: "detail", label: "รายละเอียด", type: "text" },
         ],
       },
       {
         name: "skills", label: "ทักษะ", type: "objects",
         fields: [
-          { name: "name", label: "ชื่อทักษะ", type: "text" },
-          { name: "level", label: "ระดับ", type: "text" },
+          { name: "name", label: "ชื่อทักษะ", type: "text", width: "half" },
+          { name: "level", label: "ระดับ", type: "text", width: "half" },
         ],
       },
       { name: "talents", label: "ความสามารถพิเศษ", type: "strings" },
       {
         name: "contacts", label: "ช่องทางติดต่อ", type: "objects",
         fields: [
-          { name: "label", label: "ประเภท", type: "text" },
-          { name: "value", label: "ข้อมูล", type: "text" },
+          { name: "label", label: "ประเภท", type: "text", width: "half" },
+          { name: "value", label: "ข้อมูล", type: "text", width: "half" },
           { name: "href", label: "ลิงก์ (ถ้ามี)", type: "text" },
         ],
       },
@@ -73,9 +77,9 @@ export const COLLECTIONS: Collection[] = [
       photos: [{ src: "", caption: "" }],
     }),
     fields: [
-      { name: "weekNumber", label: "สัปดาห์ที่", type: "number" },
-      { name: "dateStart", label: "วันเริ่ม", type: "date" },
-      { name: "dateEnd", label: "วันสิ้นสุด", type: "date" },
+      { name: "weekNumber", label: "สัปดาห์ที่", type: "number", width: "half" },
+      { name: "dateStart", label: "วันเริ่ม", type: "date", width: "half" },
+      { name: "dateEnd", label: "วันสิ้นสุด", type: "date", width: "half" },
       { name: "title", label: "หัวข้องาน", type: "text" },
       { name: "assignment", label: "งานที่ได้รับมอบหมาย", type: "textarea" },
       { name: "steps", label: "ขั้นตอนการทำงาน", type: "strings" },
@@ -103,8 +107,9 @@ export const COLLECTIONS: Collection[] = [
         name: "kind", label: "ประเภท", type: "select",
         options: ["photo", "video-upload", "video-youtube"],
         optionLabels: ["รูปภาพ", "วิดีโอ อัปโหลดเอง", "วิดีโอ จาก YouTube"],
+        width: "half",
       },
-      { name: "category", label: "หมวด", type: "select", options: CATS },
+      { name: "category", label: "หมวด", type: "select", options: CATS, width: "half" },
       { name: "caption", label: "คำบรรยาย", type: "text" },
       { name: "src", label: "รูปภาพ", type: "image", showWhen: { field: "kind", equals: ["photo"] } },
       { name: "file", label: "ไฟล์วิดีโอ", type: "video", showWhen: { field: "kind", equals: ["video-upload"] } },

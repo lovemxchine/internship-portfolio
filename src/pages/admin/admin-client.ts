@@ -79,8 +79,8 @@ const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls = "", text = ""):
   return n;
 };
 
-const labelled = (text: string, control: HTMLElement): HTMLLabelElement => {
-  const l = el("label", "fld");
+const labelled = (text: string, control: HTMLElement, cls = ""): HTMLLabelElement => {
+  const l = el("label", `fld ${cls}`.trim());
   l.appendChild(el("span", "", text));
   l.appendChild(control);
   return l;
@@ -245,15 +245,15 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
     const box = el("div", "sub");
     box.appendChild(el("span", "", f.label));
     const list = Array.isArray(obj[f.name]) ? (obj[f.name] as Row[]) : [];
-    const holder = el("div");
+    const holder = el("div", "stack");
     const redraw = (): void => {
       holder.textContent = "";
       list.forEach((item, i) => {
-        const sub = el("div", "sub");
+        const sub = el("div", "sub sub-grid");
         f.fields.forEach((sf) => sub.appendChild(renderField(sf, item)));
         const del = el("button", "ghost danger", "ลบรายการนี้");
         del.type = "button";
-        del.addEventListener("click", () => { list.splice(i, 1); redraw(); });
+        del.addEventListener("click", () => { list.splice(i, 1); markDirty(); redraw(); });
         const row = el("div", "row");
         row.appendChild(del);
         sub.appendChild(row);
@@ -266,6 +266,7 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
       const blank: Row = {};
       f.fields.forEach((sf) => { blank[sf.name] = sf.type === "strings" || sf.type === "objects" ? [] : ""; });
       list.push(blank);
+      markDirty();
       redraw();
     });
     box.append(holder, add);
@@ -275,7 +276,7 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
   }
 
   if (f.type === "image") {
-    const wrap = el("div", "fld");
+    const wrap = el("div", `fld ${f.width ?? ""}`.trim());
     wrap.appendChild(el("span", "", f.label));
     const rowEl = el("div", "imgrow");
     const img = el("img", "thumb");
@@ -298,7 +299,7 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
   }
 
   if (f.type === "video") {
-    const wrap = el("div", "fld");
+    const wrap = el("div", `fld ${f.width ?? ""}`.trim());
     wrap.appendChild(el("span", "", f.label));
     const status = el("small", "hint", String(obj[f.name] ?? "ยังไม่มีไฟล์"));
     const pick = el("input");
@@ -335,7 +336,7 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
     });
     sel.value = String(obj[f.name] ?? f.options[0]);
     sel.addEventListener("change", () => { obj[f.name] = sel.value; markDirty(); });
-    return labelled(f.label, sel);
+    return labelled(f.label, sel, f.width ?? "");
   }
 
   const input = f.type === "textarea" ? el("textarea") : el("input");
@@ -347,7 +348,7 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
     obj[f.name] = f.type === "number" ? Number(input.value) : input.value;
     markDirty();
   });
-  return labelled(f.label, input);
+  return labelled(f.label, input, f.width ?? "");
 };
 
 /* ---------- แผงของแต่ละ collection ---------- */
@@ -395,7 +396,9 @@ const renderPanel = (col: Collection): void => {
 
   if (col.shape === "object") {
     const card = el("div", "card");
-    const draw = (): void => { card.textContent = ""; fieldsInto(card, col.fields, state.data as Row, draw); };
+    const grid = el("div", "cardbody");
+    card.appendChild(grid);
+    const draw = (): void => { grid.textContent = ""; fieldsInto(grid, col.fields, state.data as Row, draw); };
     draw();
     panel.append(card, saveBar);
     onDirty();
@@ -484,7 +487,9 @@ const start = async (who: string): Promise<void> => {
   const tabs = $("#tabs");
   tabs.textContent = "";
   cfg.collections.forEach((c, i) => {
-    const b = el("button", `tab${i === 0 ? " on" : ""}`, c.label);
+    const data = files.get(c.path)?.data;
+    const count = Array.isArray(data) ? ` ${data.length}` : "";
+    const b = el("button", `tab${i === 0 ? " on" : ""}`, `${c.label}${count}`);
     b.type = "button";
     b.addEventListener("click", () => {
       if (dirty && !window.confirm("ยังมีการแก้ไขที่ไม่ได้บันทึก ออกจากหน้านี้เลยไหม")) return;
