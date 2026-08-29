@@ -279,16 +279,18 @@ a { color: inherit; }
 /* ปุ่มเมนูที่เลือกอยู่ "กระโดด" ไปแท็บใหม่ตอนเปลี่ยนหน้า
    ::view-transition-group ย้ายตำแหน่งให้เอง เราแค่ใส่จังหวะเด้ง */
 @keyframes pill-hop {
-  50% { translate: 0 -7px; scale: 1.12; }
+  50% { translate: 0 -4px; scale: 1.05; }
 }
 @media (prefers-reduced-motion: no-preference) {
+  /* จังหวะแบบชะลอเข้าที่ ไม่มีเด้งเกิน ตาตามได้ตลอดทาง */
   ::view-transition-group(navpill) {
-    animation-duration: .42s;
-    animation-timing-function: cubic-bezier(.34, 1.4, .5, 1);
+    animation-duration: .5s;
+    animation-timing-function: cubic-bezier(.32, .72, 0, 1);
   }
+  /* เขียนทับ cross-fade ของ default ให้เม็ดยาทึบตลอด ไม่วูบหาย */
   ::view-transition-new(navpill),
   ::view-transition-old(navpill) {
-    animation: pill-hop .42s cubic-bezier(.34, 1.4, .5, 1);
+    animation: pill-hop .5s cubic-bezier(.32, .72, 0, 1);
   }
 }
 
