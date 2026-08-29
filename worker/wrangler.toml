@@ -5,4 +5,5 @@ compatibility_date = "2026-08-29"
 [vars]
 # โดเมนของเว็บที่อนุญาตให้รับ token — กันไม่ให้หน้าอื่นแอบรับ
 # โดเมนที่เรียก Worker ได้ — เว็บจริง และเครื่องนักพัฒนา
+GH_REPO = "lovemxchine/internship-portfolio"
 ALLOWED_ORIGINS = "https://lovemxchine.github.io,http://localhost:4321"

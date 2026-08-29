@@ -12,6 +12,7 @@
  *   ADMIN_USER         ชื่อผู้ใช้
  *   ADMIN_PASS_SHA256  sha-256 ของรหัสผ่าน เป็น hex ตัวพิมพ์เล็ก
  *   SESSION_SECRET     ข้อความสุ่มยาว ๆ ใช้เซ็นบัตรผ่าน
+ *   GH_REPO            เจ้าของ/ชื่อ repo เช่น lovemxchine/internship-portfolio (ค่าธรรมดา)
  *   GH_TOKEN           fine-grained token สิทธิ์ Contents: Read and write เฉพาะ repo นี้
  */
 
@@ -91,7 +92,11 @@ export default {
       const auth = request.headers.get("Authorization")?.replace(/^Bearer /, "");
       if (!(await validSession(env, auth))) return json(env, request, { error: "หมดเวลาเข้าสู่ระบบ" }, 401);
 
-      const target = `https://api.github.com/${url.pathname.slice(4)}${url.search}`;
+      // จำกัดให้ยิงได้เฉพาะ repo นี้ ต่อให้บัตรผ่านหลุดก็ออกนอกขอบเขตไม่ได้
+      const gpath = url.pathname.slice(4);
+      if (!gpath.startsWith(`repos/${env.GH_REPO}/`)) return json(env, request, { error: "ปลายทางนอกขอบเขต" }, 403);
+
+      const target = `https://api.github.com/${gpath}${url.search}`;
       const res = await fetch(target, {
         method: request.method,
         headers: {

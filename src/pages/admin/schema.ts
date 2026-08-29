@@ -4,6 +4,8 @@ interface ShowWhen {
   showWhen?: { field: string; equals: string[] };
   /** half = ช่องสั้น วางคู่กับช่องข้าง ๆ ได้ ไม่กินทั้งแถว */
   width?: "half";
+  /** รายการที่ schema บังคับว่าต้องมีอย่างน้อย 1 ชิ้น ถ้าว่าง build จะล้ม */
+  required?: true;
 }
 
 export type Field =
@@ -82,12 +84,12 @@ export const COLLECTIONS: Collection[] = [
       { name: "dateEnd", label: "วันสิ้นสุด", type: "date", width: "half" },
       { name: "title", label: "หัวข้องาน", type: "text" },
       { name: "assignment", label: "งานที่ได้รับมอบหมาย", type: "textarea" },
-      { name: "steps", label: "ขั้นตอนการทำงาน", type: "strings" },
+      { name: "steps", label: "ขั้นตอนการทำงาน", type: "strings", required: true },
       { name: "learned", label: "สิ่งที่ได้เรียนรู้", type: "textarea" },
       { name: "problem", label: "ปัญหาที่พบ", type: "textarea" },
       { name: "solution", label: "วิธีแก้ไข", type: "textarea" },
       {
-        name: "photos", label: "ภาพประกอบ", type: "objects",
+        name: "photos", label: "ภาพประกอบ", type: "objects", required: true,
         fields: [
           { name: "src", label: "ภาพ", type: "image" },
           { name: "caption", label: "คำบรรยายภาพ", type: "text" },

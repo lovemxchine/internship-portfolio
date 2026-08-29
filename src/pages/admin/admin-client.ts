@@ -52,12 +52,12 @@ const getFile = async (path: string): Promise<FileState> => {
   return { sha: r.sha, data: data as Row | Row[] };
 };
 
-const putFile = async (path: string, sha: string, text: string, message: string): Promise<string> => {
+const putFile = async (path: string, sha: string, text: string, message: string): Promise<{ sha: string; commit: string }> => {
   const r = await gh(`/repos/${cfg.repo}/contents/${path}`, {
     method: "PUT",
     body: JSON.stringify({ message, content: b64encode(text), sha, branch: cfg.branch }),
-  }) as { content: { sha: string } };
-  return r.content.sha;
+  }) as { content: { sha: string }; commit: { sha: string } };
+  return { sha: r.content.sha, commit: r.commit.sha };
 };
 
 /* ---------- toast ---------- */
@@ -205,17 +205,20 @@ const uploadVideo = async (fileObj: File, onProgress: (pct: number) => void): Pr
 };
 
 /* ---------- ตามสถานะ build ---------- */
-const watchBuild = async (): Promise<void> => {
+/* ต้องถามด้วย head_sha ของ commit ที่เพิ่งบันทึก ไม่ใช่ "รันล่าสุด"
+   เพราะการอัปรูปแต่ละใบก็ push เหมือนกัน และ workflow ตั้ง cancel-in-progress ไว้ */
+const watchBuild = async (commit: string): Promise<void> => {
   const deadline = Date.now() + 5 * 60_000;
   await new Promise((r) => window.setTimeout(r, 6000));
   while (Date.now() < deadline) {
-    const res = await gh(`/repos/${cfg.repo}/actions/runs?branch=${cfg.branch}&per_page=1`) as {
+    const res = await gh(`/repos/${cfg.repo}/actions/runs?head_sha=${commit}`) as {
       workflow_runs: { status: string; conclusion: string | null }[];
     };
     const run = res.workflow_runs[0];
     if (run?.status === "completed") {
       if (run.conclusion === "success") toast("เว็บอัปเดตเรียบร้อยแล้ว");
-      else toast("อัปเดตเว็บไม่สำเร็จ ลองบันทึกอีกครั้ง", true);
+      else if (run.conclusion === "cancelled") toast("มีการบันทึกใหม่แซง กำลังอัปเดตรอบล่าสุดแทน");
+      else toast("อัปเดตเว็บไม่สำเร็จ — ข้อมูลบางช่องอาจกรอกไม่ครบ ลองตรวจวันที่และรูปอีกครั้ง", true);
       return;
     }
     toast("กำลังอัปเดตเว็บ…");
@@ -378,6 +381,32 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
 const visible = (f: Field, row: Row): boolean =>
   !f.showWhen || f.showWhen.equals.includes(String(row[f.showWhen.field] ?? ""));
 
+/* ช่องที่ปล่อยว่างแล้ว build จะล้ม — ประเภทรูป/วันที่/ตัวเลข กับรายการที่ระบุ required
+   ตรวจฝั่งนี้ก่อน ดีกว่าปล่อยไปพังที่ CI แล้วเว็บค้างเวอร์ชันเก่า */
+export const problems = (fields: Field[], row: Row, path = ""): string[] =>
+  fields.filter((f) => visible(f, row)).flatMap((f) => {
+    const v = row[f.name];
+    const where = path ? `${path} → ${f.label}` : f.label;
+    if (f.type === "objects") {
+      const list = Array.isArray(v) ? (v as Row[]) : [];
+      if (list.length === 0) return f.required ? [`${where} (ต้องมีอย่างน้อย 1 รายการ)`] : [];
+      return list.flatMap((it, i) => problems(f.fields, it, `${where} ${i + 1}`));
+    }
+    if (f.type === "strings") {
+      const list = Array.isArray(v) ? (v as string[]) : [];
+      const filled = list.some((t) => t.trim() !== "");
+      return f.required && !filled ? [`${where} (ต้องมีอย่างน้อย 1 บรรทัด)`] : [];
+    }
+    if (f.type === "image" || f.type === "date") return String(v ?? "").trim() ? [] : [where];
+    if (f.type === "number") return Number(v) > 0 ? [] : [where];
+    return [];
+  });
+
+export const allProblems = (col: Collection, data: Row | Row[]): string[] =>
+  Array.isArray(data)
+    ? data.flatMap((row, i) => problems(col.fields, row, `${col.label} ที่ ${i + 1}`))
+    : problems(col.fields, data);
+
 const fieldsInto = (box: HTMLElement, fields: Field[], row: Row, redraw: () => void): void => {
   fields.filter((f) => visible(f, row)).forEach((f) => {
     const node = renderField(f, row);
@@ -404,11 +433,18 @@ const renderPanel = (col: Collection): void => {
     saveNote.textContent = dirty ? "มีการแก้ไขที่ยังไม่ได้บันทึก" : "บันทึกครบแล้ว";
   };
   saveBtn.addEventListener("click", () => {
+    const missing = allProblems(col, state.data);
+    if (missing.length > 0) {
+      const shown = missing.slice(0, 3).join(" · ");
+      const more = missing.length > 3 ? ` และอีก ${missing.length - 3} ช่อง` : "";
+      toast(`ยังกรอกไม่ครบ: ${shown}${more}`, true);
+      return;
+    }
     const body = col.shape === "list" ? { items: state.data } : state.data;
     saveBtn.disabled = true;
     saveNote.textContent = "กำลังบันทึก…";
     putFile(col.path, state.sha, `${JSON.stringify(body, null, 2)}\n`, `แก้ไข${col.label}ผ่านหน้าจัดการ`)
-      .then((sha) => { state.sha = sha; setClean(); toast("บันทึกแล้ว"); void watchBuild(); })
+      .then((r) => { state.sha = r.sha; setClean(); toast("บันทึกแล้ว"); void watchBuild(r.commit); })
       .catch((e: unknown) => {
         toast(`บันทึกไม่สำเร็จ: ${String(e)}`, true);
         saveBtn.disabled = false;
@@ -499,15 +535,17 @@ const renderPanel = (col: Collection): void => {
 
 /* ---------- เข้าสู่ระบบ ---------- */
 const start = async (who: string): Promise<void> => {
+  // โหลดข้อมูลให้ผ่านก่อน ค่อยสลับหน้าจอ ไม่งั้นบัตรผ่านหมดอายุแล้วจะเหลือหน้าว่าง
+  await Promise.all(cfg.collections.map(async (c) => { files.set(c.path, await getFile(c.path)); }));
+
   $("#who").textContent = who;
   $("#logout").hidden = false;
   $("#login").hidden = true;
   $("#app").hidden = false;
 
-  await Promise.all(cfg.collections.map(async (c) => { files.set(c.path, await getFile(c.path)); }));
-
   const tabs = $("#tabs");
   tabs.textContent = "";
+  let current = cfg.collections[0];
   cfg.collections.forEach((c, i) => {
     const data = files.get(c.path)?.data;
     const count = Array.isArray(data) ? ` ${data.length}` : "";
@@ -515,10 +553,18 @@ const start = async (who: string): Promise<void> => {
     b.type = "button";
     b.addEventListener("click", () => {
       if (dirty && !window.confirm("ยังมีการแก้ไขที่ไม่ได้บันทึก ออกจากหน้านี้เลยไหม")) return;
+      const stale = dirty ? current : null;   // ของค้างต้องทิ้งจริง ไม่ใช่แค่ปิดไฟเตือน
       setClean();
       tabs.querySelectorAll(".tab").forEach((n) => n.classList.remove("on"));
       b.classList.add("on");
-      renderPanel(c);
+      current = c;
+      const go = (): void => renderPanel(c);
+      if (!stale) return go();
+      // ดึงของเดิมจาก GitHub กลับมาแทนที่ ตามที่เพิ่งบอกผู้ใช้ว่าจะทิ้ง
+      void getFile(stale.path)
+        .then((fresh) => { files.set(stale.path, fresh); })
+        .catch(() => toast("ดึงข้อมูลเดิมกลับมาไม่ได้ รีเฟรชหน้านี้ก่อนแก้ต่อ", true))
+        .finally(go);
     });
     tabs.appendChild(b);
   });
@@ -557,7 +603,11 @@ export const mountAdmin = (): void => {
       const saved = localStorage.getItem(SESSION_KEY);
       if (saved) {
         session = saved;
-        start(localStorage.getItem(USER_KEY) ?? "").catch(() => localStorage.removeItem(SESSION_KEY));
+        start(localStorage.getItem(USER_KEY) ?? "").catch(() => {
+          localStorage.removeItem(SESSION_KEY);
+          session = "";
+          showLoginError("หมดเวลาเข้าสู่ระบบ กรุณาเข้าใหม่");
+        });
       }
     })
     .catch(() => showLoginError("โหลดการตั้งค่าไม่ได้"));
