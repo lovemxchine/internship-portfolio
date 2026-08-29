@@ -1,9 +1,12 @@
 /** โครงฟอร์มของหน้า admin — เพิ่ม/แก้ฟิลด์ที่ไฟล์นี้ที่เดียว */
+/** แสดงช่องนี้เฉพาะตอนอีกช่องมีค่าตามที่กำหนด */
+interface ShowWhen { showWhen?: { field: string; equals: string[] } }
+
 export type Field =
-  | { name: string; label: string; type: "text" | "textarea" | "image" | "video" | "number" | "date" }
-  | { name: string; label: string; type: "select"; options: string[] }
-  | { name: string; label: string; type: "strings" }
-  | { name: string; label: string; type: "objects"; fields: Field[] };
+  | ({ name: string; label: string; type: "text" | "textarea" | "image" | "video" | "number" | "date" } & ShowWhen)
+  | ({ name: string; label: string; type: "select"; options: string[]; optionLabels?: string[] } & ShowWhen)
+  | ({ name: string; label: string; type: "strings" } & ShowWhen)
+  | ({ name: string; label: string; type: "objects"; fields: Field[] } & ShowWhen);
 
 export interface Collection {
   key: string;
@@ -96,12 +99,16 @@ export const COLLECTIONS: Collection[] = [
     titleField: "caption",
     newItem: () => ({ id: `g${String(Date.now()).slice(-6)}`, kind: "photo", category: CATS[0], caption: "", src: "" }),
     fields: [
-      { name: "kind", label: "ประเภท", type: "select", options: ["photo", "video-upload", "video-youtube"] },
+      {
+        name: "kind", label: "ประเภท", type: "select",
+        options: ["photo", "video-upload", "video-youtube"],
+        optionLabels: ["รูปภาพ", "วิดีโอ อัปโหลดเอง", "วิดีโอ จาก YouTube"],
+      },
       { name: "category", label: "หมวด", type: "select", options: CATS },
       { name: "caption", label: "คำบรรยาย", type: "text" },
-      { name: "src", label: "รูปภาพ — ใช้เมื่อประเภทเป็น photo", type: "image" },
-      { name: "file", label: "ไฟล์วิดีโอ — ใช้เมื่อ video-upload", type: "video" },
-      { name: "youtubeId", label: "รหัสวิดีโอ YouTube — ใช้เมื่อ video-youtube", type: "text" },
+      { name: "src", label: "รูปภาพ", type: "image", showWhen: { field: "kind", equals: ["photo"] } },
+      { name: "file", label: "ไฟล์วิดีโอ", type: "video", showWhen: { field: "kind", equals: ["video-upload"] } },
+      { name: "youtubeId", label: "รหัสวิดีโอ YouTube", type: "text", showWhen: { field: "kind", equals: ["video-youtube"] } },
     ],
   },
   {

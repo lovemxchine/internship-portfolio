@@ -6,6 +6,7 @@ type Row = Record<string, unknown>;
 interface FileState { sha: string; data: Row | Row[] }
 
 const SESSION_KEY = "ipf-admin-session";
+const USER_KEY = "ipf-admin-user";
 const $ = <T extends HTMLElement>(sel: string): T => {
   const el = document.querySelector<T>(sel);
   if (!el) throw new Error(`ไม่พบ element: ${sel}`);
@@ -15,6 +16,12 @@ const $ = <T extends HTMLElement>(sel: string): T => {
 let cfg: Cfg;
 let session = "";
 const files = new Map<string, FileState>();
+
+/* ---------- กันแก้แล้วลืมบันทึก ---------- */
+let dirty = false;
+let onDirty: (() => void) | null = null;
+const markDirty = (): void => { dirty = true; onDirty?.(); };
+const setClean = (): void => { dirty = false; onDirty?.(); };
 
 /* ---------- GitHub API ---------- */
 const gh = async (path: string, init?: RequestInit): Promise<unknown> => {
@@ -321,13 +328,13 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
 
   if (f.type === "select") {
     const sel = el("select");
-    f.options.forEach((o) => {
-      const opt = el("option", "", o);
+    f.options.forEach((o, i) => {
+      const opt = el("option", "", f.optionLabels?.[i] ?? o);
       opt.value = o;
       sel.appendChild(opt);
     });
     sel.value = String(obj[f.name] ?? f.options[0]);
-    sel.addEventListener("change", () => { obj[f.name] = sel.value; });
+    sel.addEventListener("change", () => { obj[f.name] = sel.value; markDirty(); });
     return labelled(f.label, sel);
   }
 
@@ -338,11 +345,27 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
   input.value = String(obj[f.name] ?? "");
   input.addEventListener("input", () => {
     obj[f.name] = f.type === "number" ? Number(input.value) : input.value;
+    markDirty();
   });
   return labelled(f.label, input);
 };
 
 /* ---------- แผงของแต่ละ collection ---------- */
+/** ช่องที่ผูกกับ showWhen จะโผล่เฉพาะตอนค่าตรง */
+const visible = (f: Field, row: Row): boolean =>
+  !f.showWhen || f.showWhen.equals.includes(String(row[f.showWhen.field] ?? ""));
+
+const fieldsInto = (box: HTMLElement, fields: Field[], row: Row, redraw: () => void): void => {
+  fields.filter((f) => visible(f, row)).forEach((f) => {
+    const node = renderField(f, row);
+    // เปลี่ยนประเภทแล้วต้องวาดใหม่ เพราะช่องที่เกี่ยวข้องเปลี่ยนตาม
+    if (f.type === "select" && fields.some((o) => o.showWhen?.field === f.name)) {
+      node.addEventListener("change", redraw);
+    }
+    box.appendChild(node);
+  });
+};
+
 const renderPanel = (col: Collection): void => {
   const panel = $("#panel");
   panel.textContent = "";
@@ -352,21 +375,30 @@ const renderPanel = (col: Collection): void => {
   const saveBar = el("div", "sticky-save row");
   const saveBtn = el("button", "stamp", "บันทึกลงเว็บ");
   saveBtn.type = "button";
+  const saveNote = el("small", "hint");
+  onDirty = () => {
+    saveBtn.disabled = !dirty;
+    saveNote.textContent = dirty ? "มีการแก้ไขที่ยังไม่ได้บันทึก" : "บันทึกครบแล้ว";
+  };
   saveBtn.addEventListener("click", () => {
     const body = col.shape === "list" ? { items: state.data } : state.data;
     saveBtn.disabled = true;
-    toast("กำลังบันทึก…");
+    saveNote.textContent = "กำลังบันทึก…";
     putFile(col.path, state.sha, `${JSON.stringify(body, null, 2)}\n`, `แก้ไข${col.label}ผ่านหน้าจัดการ`)
-      .then((sha) => { state.sha = sha; toast("บันทึกแล้ว"); void watchBuild(); })
-      .catch((e: unknown) => toast(`บันทึกไม่สำเร็จ: ${String(e)}`, true))
-      .finally(() => { saveBtn.disabled = false; });
+      .then((sha) => { state.sha = sha; setClean(); toast("บันทึกแล้ว"); void watchBuild(); })
+      .catch((e: unknown) => {
+        toast(`บันทึกไม่สำเร็จ: ${String(e)}`, true);
+        saveBtn.disabled = false;
+      });
   });
-  saveBar.appendChild(saveBtn);
+  saveBar.append(saveBtn, saveNote);
 
   if (col.shape === "object") {
     const card = el("div", "card");
-    col.fields.forEach((f) => card.appendChild(renderField(f, state.data as Row)));
+    const draw = (): void => { card.textContent = ""; fieldsInto(card, col.fields, state.data as Row, draw); };
+    draw();
     panel.append(card, saveBar);
+    onDirty();
     return;
   }
 
@@ -374,38 +406,65 @@ const renderPanel = (col: Collection): void => {
   const holder = el("div");
   const redraw = (): void => {
     holder.textContent = "";
+    if (rows.length === 0) holder.appendChild(el("p", "muted", `ยังไม่มี${col.label} กดปุ่มด้านล่างเพื่อเพิ่มรายการแรก`));
     rows.forEach((item, i) => {
       const card = el("div", "card");
       const head = el("header");
       const title = String(item[col.titleField ?? "title"] ?? "") || "(ยังไม่มีชื่อ)";
-      head.appendChild(el("h3", "", title));
+      head.appendChild(el("h3", "", `${i + 1}. ${title}`));
+
+      const tools = el("div", "row tools");
+      const move = (to: number): void => {
+        if (to < 0 || to >= rows.length) return;
+        [rows[i], rows[to]] = [rows[to], rows[i]];
+        markDirty();
+        redraw();
+      };
+      const up = el("button", "ghost", "↑");
+      up.type = "button";
+      up.title = "เลื่อนขึ้น";
+      up.disabled = i === 0;
+      up.addEventListener("click", () => move(i - 1));
+      const down = el("button", "ghost", "↓");
+      down.type = "button";
+      down.title = "เลื่อนลง";
+      down.disabled = i === rows.length - 1;
+      down.addEventListener("click", () => move(i + 1));
       const del = el("button", "ghost danger", "ลบ");
       del.type = "button";
       del.addEventListener("click", () => {
         if (!window.confirm(`ลบ "${title}" ออกจาก${col.label}?`)) return;
         rows.splice(i, 1);
+        markDirty();
         redraw();
       });
-      head.appendChild(del);
+      tools.append(up, down, del);
+      head.appendChild(tools);
       card.appendChild(head);
-      col.fields.forEach((f) => card.appendChild(renderField(f, item)));
+
+      const body = el("div");
+      const drawBody = (): void => { body.textContent = ""; fieldsInto(body, col.fields, item, drawBody); };
+      drawBody();
+      card.appendChild(body);
       holder.appendChild(card);
     });
   };
-  const add = el("button", "ghost", `+ เพิ่ม${col.label}`);
+  const add = el("button", "stamp outline", `+ เพิ่ม${col.label}`);
   add.type = "button";
   add.addEventListener("click", () => {
     rows.push(col.newItem ? col.newItem() : {});
+    markDirty();
     redraw();
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
   });
   redraw();
   panel.append(holder, add, saveBar);
+  onDirty();
 };
 
 /* ---------- เข้าสู่ระบบ ---------- */
-const start = async (): Promise<void> => {
-  const user = await gh("/user") as { login: string };
-  $("#who").textContent = user.login;
+const start = async (who: string): Promise<void> => {
+  $("#who").textContent = who;
   $("#logout").hidden = false;
   $("#login").hidden = true;
   $("#app").hidden = false;
@@ -418,6 +477,8 @@ const start = async (): Promise<void> => {
     const b = el("button", `tab${i === 0 ? " on" : ""}`, c.label);
     b.type = "button";
     b.addEventListener("click", () => {
+      if (dirty && !window.confirm("ยังมีการแก้ไขที่ไม่ได้บันทึก ออกจากหน้านี้เลยไหม")) return;
+      setClean();
       tabs.querySelectorAll(".tab").forEach((n) => n.classList.remove("on"));
       b.classList.add("on");
       renderPanel(c);
@@ -437,8 +498,9 @@ const login = async (user: string, pass: string): Promise<void> => {
   const body = await res.json() as { session?: string; error?: string };
   if (!res.ok || !body.session) throw new Error(body.error ?? "เข้าสู่ระบบไม่สำเร็จ");
   session = body.session;
-  await start();
+  await start(user);
   localStorage.setItem(SESSION_KEY, session);
+  localStorage.setItem(USER_KEY, user);
 };
 
 const showLoginError = (msg: string): void => {
@@ -458,10 +520,17 @@ export const mountAdmin = (): void => {
       const saved = localStorage.getItem(SESSION_KEY);
       if (saved) {
         session = saved;
-        start().catch(() => localStorage.removeItem(SESSION_KEY));
+        start(localStorage.getItem(USER_KEY) ?? "").catch(() => localStorage.removeItem(SESSION_KEY));
       }
     })
     .catch(() => showLoginError("โหลดการตั้งค่าไม่ได้"));
+
+  // เตือนก่อนปิดแท็บถ้ายังมีของค้าง — ต้องผูกในนี้ ไม่ใช่ระดับโมดูล เพราะตอน build ไม่มี window
+  window.addEventListener("beforeunload", (ev) => {
+    if (!dirty) return;
+    ev.preventDefault();
+    ev.returnValue = "";
+  });
 
   const form = $<HTMLFormElement>("#loginform");
   form.addEventListener("submit", (ev) => {

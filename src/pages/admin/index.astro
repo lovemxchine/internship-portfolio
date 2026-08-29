@@ -120,6 +120,12 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       .toast.bad { background: #b3261e; }
       .sticky-save { position: sticky; bottom: 0; background: var(--paper); padding: .9rem 0; border-top: 1px solid var(--rule); }
       .hint { display: block; margin-top: .4rem; font-size: .82rem; color: var(--ink-3); word-break: break-all; }
+      .tools { margin-top: 0; gap: .35rem; }
+      .tools .ghost { padding: .25rem .6rem; min-width: 2rem; }
+      .ghost:disabled { opacity: .35; cursor: not-allowed; }
+      .stamp:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+      .sticky-save .hint { margin: 0; }
+      #panel > .stamp { margin-top: .4rem; }
 
       @media (max-width: 560px) {
         .bar-in { flex-wrap: wrap; gap: .5rem; padding-block: .6rem; }
