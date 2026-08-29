@@ -142,10 +142,22 @@ const shrinkImage = async (fileObj: File): Promise<Blob> => {
   return out;
 };
 
+/* image() ของ Astro รับเส้นทางที่เทียบกับไฟล์ JSON ใน src/content เท่านั้น
+   src/assets/uploads → ../assets/uploads */
+const contentPath = (repoPath: string): string => repoPath.replace(/^src\//, "../");
+
+/* รูปเก็บอยู่ใน src/ ซึ่งเว็บที่ build แล้วไม่ได้เสิร์ฟ หน้า admin เลยดูรูปจาก repo ตรง ๆ */
+const previewUrl = (p: string): string =>
+  p.startsWith("/") || p.startsWith("http")
+    ? p
+    : `https://raw.githubusercontent.com/${cfg.repo}/${cfg.branch}/${p.replace(/^\.\.\//, "src/")}`;
+
 const uploadImage = async (fileObj: File): Promise<string> => {
   const small = await shrinkImage(fileObj);
   const name = `${Date.now()}-${fileObj.name.replace(/\.[^.]+$/, "").replace(/[^\w-]/g, "-")}.webp`;
-  return uploadBinary(`${cfg.uploadDir}/${name}`, small, `อัปโหลดรูป ${name}`);
+  const target = `${cfg.uploadDir}/${name}`;
+  await uploadBinary(target, small, `อัปโหลดรูป ${name}`);
+  return contentPath(target);
 };
 
 /* ---------- บีบวิดีโอก่อนอัป ----------
@@ -290,7 +302,7 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
     const rowEl = el("div", "imgrow");
     const img = el("img", "thumb");
     const cur = typeof obj[f.name] === "string" ? (obj[f.name] as string) : "";
-    if (cur) img.src = cur.startsWith("/") ? cur : cur.replace(/^\.\.\//, "/src/");
+    if (cur) img.src = previewUrl(cur);
     const pick = filePicker("image/*");
     const pickBox = el("label", "pickbtn", "เลือกรูป");
     pickBox.appendChild(pick);
@@ -299,7 +311,7 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
       if (!chosen) return;
       toast("กำลังอัปโหลดรูป…");
       uploadImage(chosen)
-        .then((p) => { obj[f.name] = p; img.src = p; toast("อัปโหลดรูปแล้ว"); })
+        .then((p) => { obj[f.name] = p; img.src = previewUrl(p); markDirty(); toast("อัปโหลดรูปแล้ว กดบันทึกลงเว็บด้วย"); })
         .catch((e: unknown) => toast(`อัปโหลดไม่สำเร็จ: ${String(e)}`, true));
     });
     rowEl.append(img, pickBox);
@@ -324,7 +336,8 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
         .then((path) => {
           obj[f.name] = path;
           status.textContent = path;
-          toast("อัปโหลดวิดีโอแล้ว");
+          markDirty();
+          toast("อัปโหลดวิดีโอแล้ว กดบันทึกลงเว็บด้วย");
         })
         .catch((e: unknown) => {
           status.textContent = "อัปโหลดไม่สำเร็จ";
