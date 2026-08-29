@@ -127,6 +127,8 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       .card[open] > summary { border-bottom: 1px dashed var(--rule); padding-bottom: var(--gap); margin-bottom: var(--gap); }
       details.card:not([open]) { padding-block: .5rem; margin-bottom: .45rem; }
       .sub { border: 1px dashed var(--rule); border-radius: var(--radius-sm); padding: var(--gap); margin: 0; }
+      /* ปุ่มในกริดจะยืดเต็มช่องถ้าไม่สั่ง ให้กว้างเท่าข้อความพอ */
+      .sub > button, .cardbody > button, .stack > button { justify-self: start; }
       .line.imgrow { grid-column: 1 / -1; }
       .sub .row { margin-top: 0; grid-column: 1 / -1; }
       .stack { display: grid; gap: var(--gap); grid-column: 1 / -1; }
@@ -161,8 +163,18 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       .sticky-save {
         position: sticky; bottom: 0;
         margin-top: var(--gap);
-        background: var(--paper);
         padding: var(--gap) 0;
+      }
+      /* พื้นหลังต้องกินเต็มความกว้างจอ ไม่ใช่แค่ในคอลัมน์เนื้อหา
+         ไม่งั้นลายจุดของพื้นหลังโผล่ข้าง ๆ แถบ ดูเหมือนแผงลอยผิดที่ */
+      .sticky-save::before {
+        content: "";
+        position: absolute;
+        inset: 0 50%;
+        translate: -50% 0;
+        width: 100vw;
+        z-index: -1;
+        background: var(--paper);
         border-top: 1px solid var(--rule);
         box-shadow: 0 -14px 22px -18px rgb(0 0 0 / .45);
       }
