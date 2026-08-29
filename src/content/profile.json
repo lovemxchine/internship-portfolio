@@ -1,8 +1,8 @@
 {
   "id": "profile",
-  "fullName": "ชื่อ–สกุล นักศึกษา",
+  "fullName": "test",
   "studentId": "รหัสนักศึกษา",
-  "avatar": "../assets/profile/avatar.jpg",
+  "avatar": "/src/assets/uploads/1788011193724-202507170910120228.webp",
   "company": "ชื่อสถานประกอบการ",
   "department": "แผนกที่เข้าฝึกงาน",
   "periodLabel": "วันเริ่ม – วันสิ้นสุดการฝึกงาน",
