@@ -212,6 +212,15 @@ const watchBuild = async (): Promise<void> => {
   toast("อัปเดตนานผิดปกติ ลองรีเฟรชหน้าเว็บดูอีกที", true);
 };
 
+/* ปุ่มเลือกไฟล์ — ซ่อน input เดิมไว้ใน label เพราะข้อความ "Choose File" ของเบราว์เซอร์แก้เป็นไทยไม่ได้ */
+const filePicker = (accept: string): HTMLInputElement => {
+  const inp = el("input");
+  inp.type = "file";
+  inp.accept = accept;
+  inp.className = "sr-only";
+  return inp;
+};
+
 /* ---------- สร้างฟอร์มตาม schema ---------- */
 const renderField = (f: Field, obj: Row): HTMLElement => {
   if (f.type === "strings") {
@@ -282,9 +291,9 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
     const img = el("img", "thumb");
     const cur = typeof obj[f.name] === "string" ? (obj[f.name] as string) : "";
     if (cur) img.src = cur.startsWith("/") ? cur : cur.replace(/^\.\.\//, "/src/");
-    const pick = el("input");
-    pick.type = "file";
-    pick.accept = "image/*";
+    const pick = filePicker("image/*");
+    const pickBox = el("label", "pickbtn", "เลือกรูป");
+    pickBox.appendChild(pick);
     pick.addEventListener("change", () => {
       const chosen = pick.files?.[0];
       if (!chosen) return;
@@ -293,7 +302,7 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
         .then((p) => { obj[f.name] = p; img.src = p; toast("อัปโหลดรูปแล้ว"); })
         .catch((e: unknown) => toast(`อัปโหลดไม่สำเร็จ: ${String(e)}`, true));
     });
-    rowEl.append(img, pick);
+    rowEl.append(img, pickBox);
     wrap.appendChild(rowEl);
     return wrap;
   }
@@ -302,9 +311,9 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
     const wrap = el("div", `fld ${f.width ?? ""}`.trim());
     wrap.appendChild(el("span", "", f.label));
     const status = el("small", "hint", String(obj[f.name] ?? "ยังไม่มีไฟล์"));
-    const pick = el("input");
-    pick.type = "file";
-    pick.accept = "video/*";
+    const pick = filePicker("video/*");
+    const pickBox = el("label", "pickbtn", "เลือกวิดีโอ");
+    pickBox.appendChild(pick);
     pick.addEventListener("change", () => {
       const chosen = pick.files?.[0];
       if (!chosen) return;
@@ -323,7 +332,7 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
         })
         .finally(() => { pick.disabled = false; });
     });
-    wrap.append(pick, status);
+    wrap.append(pickBox, status);
     return wrap;
   }
 

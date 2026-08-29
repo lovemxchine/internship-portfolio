@@ -70,20 +70,19 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       .bar-right { display: flex; align-items: center; gap: .8rem; }
       .who { font-size: .85rem; color: var(--ink-3); }
       .wrap { padding-block: 1.6rem 4rem; max-width: 900px; }
-      .pad { padding: 1.4rem 1.5rem 1.6rem; }
+      .pad { padding: 1.4rem 1.5rem; }
       h1 { font-size: 1.4rem; margin-bottom: .6rem; }
       .muted { color: var(--ink-2); }
       .small { font-size: .85rem; }
-      .err { color: #b3261e; margin-top: .8rem; }
+      .err { color: #b3261e; margin-top: var(--gap); }
       code { background: var(--paper); padding: .1rem .35rem; border-radius: 4px; font-size: .85em; }
 
       /* ระยะห่างมีค่าเดียวทั้งหน้า แนวตั้งกับแนวนอนเท่ากัน */
       .wrap { --gap: 1.1rem; }
-      .cardbody, .sub-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: var(--gap);
-      }
+      .cardbody, .sub, #loginform { display: grid; gap: var(--gap); }
+      .cardbody, .sub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #loginform { margin-top: var(--gap); }
+      #loginform .row { margin-top: 0; }
       .fld { display: block; margin: 0; grid-column: 1 / -1; }
       .fld.half { grid-column: span 1; }
       .fld > span { display: block; font-size: .85rem; color: var(--ink-2); margin-bottom: .35rem; }
@@ -95,7 +94,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       textarea { min-height: 5.5rem; resize: vertical; line-height: 1.7; }
       input:focus, textarea:focus, select:focus { outline: 2px solid var(--ink-red); outline-offset: 1px; border-color: transparent; }
 
-      .row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin-top: 1.2rem; }
+      .row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin-top: var(--gap); }
       button { font: inherit; cursor: pointer; }
       .ghost {
         background: none; border: 1.5px solid var(--rule); color: var(--ink-2);
@@ -126,9 +125,26 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       .card[open] > summary { border-bottom: 1px dashed var(--rule); padding-bottom: var(--gap); margin-bottom: var(--gap); }
       details.card:not([open]) { padding-block: .5rem; margin-bottom: .45rem; }
       .sub { border: 1px dashed var(--rule); border-radius: var(--radius-sm); padding: var(--gap); margin: 0; }
+      .line.imgrow { grid-column: 1 / -1; }
       .sub .row { margin-top: 0; grid-column: 1 / -1; }
-      .stack { display: grid; gap: var(--gap); margin-bottom: var(--gap); }
+      .stack { display: grid; gap: var(--gap); grid-column: 1 / -1; }
       .sub > span { grid-column: 1 / -1; font-size: .85rem; color: var(--ink-2); }
+
+      /* ปุ่มเลือกไฟล์ — input จริงซ่อนอยู่ใน label เพราะข้อความในปุ่มของเบราว์เซอร์เปลี่ยนเป็นไทยไม่ได้ */
+      .pickbtn {
+        display: inline-flex; align-items: center; gap: .45rem;
+        font-family: var(--font-display); font-weight: 600; font-size: .9rem;
+        color: var(--ink-red); cursor: pointer; user-select: none;
+        padding: .42rem 1.1rem; border-radius: 99px;
+        background: color-mix(in srgb, var(--ink-red) 12%, transparent);
+        border: 1.5px dashed color-mix(in srgb, var(--ink-red) 40%, transparent);
+        transition: background .16s ease, translate .16s ease;
+      }
+      .pickbtn::before { content: "\2191"; font-size: 1.05em; line-height: 1; }
+      .pickbtn:hover { background: color-mix(in srgb, var(--ink-red) 20%, transparent); translate: 0 -1px; }
+      .pickbtn:active { translate: 0 1px; }
+      .pickbtn:focus-within { outline: 2px solid var(--ink-red); outline-offset: 3px; }
+      .pickbtn:has(input:disabled) { opacity: .45; cursor: not-allowed; translate: none; }
 
       .thumb { width: 84px; height: 84px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--paper-edge); background: var(--paper); }
       .imgrow { display: flex; align-items: center; gap: .8rem; }
@@ -155,9 +171,9 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       @media (max-width: 560px) {
         .bar-in { flex-wrap: wrap; gap: .5rem; padding-block: .6rem; }
         .who { width: 100%; order: 3; }
-        .pad { padding: 1.1rem 1rem 1.2rem; }
-        .card { padding: .9rem .9rem 1.1rem; }
-        .sub { padding: .7rem .7rem; }
+        .wrap { --gap: .85rem; }
+        .pad { padding: 1.1rem 1rem; }
+        .card { padding: var(--gap); }
         /* 16px กันไม่ให้ iOS ซูมเข้าตอนแตะช่องกรอก */
         input, textarea, select { font-size: 16px; padding: .55rem .65rem; }
         .imgrow { align-items: flex-start; }
