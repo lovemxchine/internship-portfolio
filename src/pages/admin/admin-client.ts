@@ -404,12 +404,17 @@ const renderPanel = (col: Collection): void => {
 
   const rows = state.data as Row[];
   const holder = el("div");
+  const open = new Set<number>();          // การ์ดที่กางอยู่ คงไว้ตอนวาดใหม่
   const redraw = (): void => {
     holder.textContent = "";
     if (rows.length === 0) holder.appendChild(el("p", "muted", `ยังไม่มี${col.label} กดปุ่มด้านล่างเพื่อเพิ่มรายการแรก`));
     rows.forEach((item, i) => {
-      const card = el("div", "card");
-      const head = el("header");
+      const card = document.createElement("details");
+      card.className = "card";
+      card.open = open.has(i);
+      card.addEventListener("toggle", () => { card.open ? open.add(i) : open.delete(i); });
+
+      const head = document.createElement("summary");
       const title = String(item[col.titleField ?? "title"] ?? "") || "(ยังไม่มีชื่อ)";
       head.appendChild(el("h3", "", `${i + 1}. ${title}`));
 
@@ -417,32 +422,35 @@ const renderPanel = (col: Collection): void => {
       const move = (to: number): void => {
         if (to < 0 || to >= rows.length) return;
         [rows[i], rows[to]] = [rows[to], rows[i]];
+        open.clear();
         markDirty();
         redraw();
       };
-      const up = el("button", "ghost", "↑");
-      up.type = "button";
-      up.title = "เลื่อนขึ้น";
+      // ปุ่มอยู่ใน summary ต้องกันไม่ให้การกดไปพับ/กางการ์ด
+      const tool = (text: string, hint: string, act: () => void): HTMLButtonElement => {
+        const b = el("button", "ghost", text);
+        b.type = "button";
+        b.title = hint;
+        b.addEventListener("click", (ev) => { ev.preventDefault(); ev.stopPropagation(); act(); });
+        return b;
+      };
+      const up = tool("↑", "เลื่อนขึ้น", () => move(i - 1));
       up.disabled = i === 0;
-      up.addEventListener("click", () => move(i - 1));
-      const down = el("button", "ghost", "↓");
-      down.type = "button";
-      down.title = "เลื่อนลง";
+      const down = tool("↓", "เลื่อนลง", () => move(i + 1));
       down.disabled = i === rows.length - 1;
-      down.addEventListener("click", () => move(i + 1));
-      const del = el("button", "ghost danger", "ลบ");
-      del.type = "button";
-      del.addEventListener("click", () => {
+      const del = tool("ลบ", "ลบรายการนี้", () => {
         if (!window.confirm(`ลบ "${title}" ออกจาก${col.label}?`)) return;
         rows.splice(i, 1);
+        open.clear();
         markDirty();
         redraw();
       });
+      del.className = "ghost danger";
       tools.append(up, down, del);
       head.appendChild(tools);
       card.appendChild(head);
 
-      const body = el("div");
+      const body = el("div", "cardbody");
       const drawBody = (): void => { body.textContent = ""; fieldsInto(body, col.fields, item, drawBody); };
       drawBody();
       card.appendChild(body);
@@ -453,6 +461,8 @@ const renderPanel = (col: Collection): void => {
   add.type = "button";
   add.addEventListener("click", () => {
     rows.push(col.newItem ? col.newItem() : {});
+    open.clear();
+    open.add(rows.length - 1);           // กางเฉพาะใบที่เพิ่งเพิ่ม
     markDirty();
     redraw();
     window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
