@@ -42,9 +42,9 @@ const tilts = [-0.9, 0.6, -0.4, 0.8, -0.7, 0.5, -0.5, 0.7];
 
           if (d.kind === "photo") {
             return (
-              <figure class:list={["tile", "polaroid", "taped", tapeCls]} style={tilt} data-cat={d.category}>
+              <figure class:list={["tile", "reveal", "polaroid", "taped", tapeCls]} style={tilt} data-cat={d.category}>
                 <button type="button" class="open" data-full={d.src.src} data-cap={d.caption}>
-                  <Image src={d.src} alt={d.caption} widths={[380, 760]} sizes="(max-width: 720px) 88vw, 290px" />
+                  <Image src={d.src} alt={d.caption} widths={[380, 760]} sizes="(max-width: 720px) 92vw, 380px" />
                   <span class="sr-only">ดูภาพขนาดเต็ม: {d.caption}</span>
                 </button>
                 <figcaption>{d.caption}</figcaption>
@@ -54,9 +54,9 @@ const tilts = [-0.9, 0.6, -0.4, 0.8, -0.7, 0.5, -0.5, 0.7];
 
           if (d.kind === "video-upload") {
             return (
-              <figure class:list={["tile", "polaroid", "taped", "wide", tapeCls]} style={tilt} data-cat={d.category}>
+              <figure class:list={["tile", "reveal", "polaroid", "taped", "wide", tapeCls]} style={tilt} data-cat={d.category}>
                 <video controls preload="none" poster={d.poster?.src} playsinline>
-                  <source src={d.file} type="video/mp4" />
+                  <source src={d.file} />
                   เบราว์เซอร์ของคุณไม่รองรับการเล่นวิดีโอ
                 </video>
                 <figcaption>{d.caption}</figcaption>
@@ -65,7 +65,7 @@ const tilts = [-0.9, 0.6, -0.4, 0.8, -0.7, 0.5, -0.5, 0.7];
           }
 
           return (
-            <figure class:list={["tile", "polaroid", "taped", "wide", tapeCls]} style={tilt} data-cat={d.category}>
+            <figure class:list={["tile", "reveal", "polaroid", "taped", "wide", tapeCls]} style={tilt} data-cat={d.category}>
               <div class="ratio">
                 <iframe
                   src={`https://www.youtube-nocookie.com/embed/${d.youtubeId}`}
@@ -157,7 +157,7 @@ const tilts = [-0.9, 0.6, -0.4, 0.8, -0.7, 0.5, -0.5, 0.7];
 
   .wall {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 218px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
     gap: 2.2rem 1.4rem;
     padding-bottom: 2.5rem;
     align-items: start;

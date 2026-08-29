@@ -120,6 +120,21 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       }
       .toast.bad { background: #b3261e; }
       .sticky-save { position: sticky; bottom: 0; background: var(--paper); padding: .9rem 0; border-top: 1px solid var(--rule); }
+      .hint { display: block; margin-top: .4rem; font-size: .82rem; color: var(--ink-3); word-break: break-all; }
+
+      @media (max-width: 560px) {
+        .bar-in { flex-wrap: wrap; gap: .5rem; padding-block: .6rem; }
+        .who { width: 100%; order: 3; }
+        .pad { padding: 1.1rem 1rem 1.2rem; }
+        .card { padding: .9rem .9rem 1.1rem; }
+        .sub { padding: .7rem .7rem; }
+        /* 16px กันไม่ให้ iOS ซูมเข้าตอนแตะช่องกรอก */
+        input, textarea, select { font-size: 16px; padding: .55rem .65rem; }
+        .imgrow { align-items: flex-start; }
+        .thumb { width: 64px; height: 64px; }
+        input[type="file"] { font-size: .85rem; }
+        .sticky-save .stamp { width: 100%; text-align: center; }
+      }
     </style>
   </body>
 </html>

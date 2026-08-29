@@ -35,12 +35,12 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
         </p>
       </div>
 
-      <figure class="portrait polaroid taped tape-right washi-grid">
-        <Image src={p.avatar} alt={`รูปของ ${p.fullName}`} widths={[300, 600]} sizes="(max-width: 880px) 55vw, 290px" />
+      <figure class="portrait reveal polaroid taped tape-right washi-grid">
+        <Image src={p.avatar} alt={`รูปของ ${p.fullName}`} widths={[300, 600]} sizes="(max-width: 880px) 70vw, 370px" />
         <figcaption>{p.fullName.split(" ")[0]} · {p.studentId}</figcaption>
       </figure>
 
-      <aside class="slip sheet taped tape-left washi-star">
+      <aside class="slip reveal sheet taped tape-left washi-star">
         <dl>
           <div><dt>รหัสนักศึกษา</dt><dd>{p.studentId}</dd></div>
           <div><dt>ระยะเวลาฝึกงาน</dt><dd>{p.periodLabel}</dd></div>
@@ -116,7 +116,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 
   .cta { display: flex; gap: 1rem; flex-wrap: wrap; padding-top: 1.6rem; }
 
-  .portrait { rotate: 1.7deg; margin: 0 0 0 auto; max-width: 290px; width: 100%; }
+  .portrait { rotate: 1.7deg; margin: 0 0 0 auto; max-width: 370px; width: 100%; }
   .portrait img { aspect-ratio: 1; object-fit: cover; }
 
   .slip { padding: 1rem 1.15rem; rotate: -1deg; }
@@ -149,7 +149,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
   .all { font-family: var(--font-display); font-size: .93rem; font-weight: 600; color: var(--ink-red); text-decoration: none; }
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
     gap: 2rem 1.6rem;
   }
 
@@ -164,7 +164,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
       grid-template-rows: auto;
       row-gap: 1.5rem;
     }
-    .portrait { margin: 0; max-width: 200px; rotate: -1.6deg; }
+    .portrait { margin: 0; max-width: 260px; rotate: -1.6deg; }
     .slip { rotate: .8deg; }
     .cta { padding-top: 1.2rem; }
   }

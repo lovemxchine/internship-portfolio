@@ -80,17 +80,129 @@ const labelled = (text: string, control: HTMLElement): HTMLLabelElement => {
 };
 
 /* ---------- อัปโหลดรูป ---------- */
-const uploadImage = async (fileObj: File): Promise<string> => {
-  const buf = new Uint8Array(await fileObj.arrayBuffer());
-  let bin = "";
-  buf.forEach((b) => { bin += String.fromCharCode(b); });
-  const safe = fileObj.name.replace(/[^\w.-]/g, "-");
-  const path = `${cfg.uploadDir}/${Date.now()}-${safe}`;
-  await gh(`/repos/${cfg.repo}/contents/${path}`, {
-    method: "PUT",
-    body: JSON.stringify({ message: `อัปโหลดรูป ${safe}`, content: btoa(bin), branch: cfg.branch }),
+/* ---------- แปลงไฟล์เป็น base64 ---------- */
+const blobToB64 = (blob: Blob): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(",")[1] ?? "");
+    r.onerror = () => reject(new Error("อ่านไฟล์ไม่สำเร็จ"));
+    r.readAsDataURL(blob);
+  });
+
+/* ---------- อัปไฟล์ผ่าน Git Data API ----------
+   Contents API รับได้แค่ 1 MB ต่อไฟล์ จึงต้องผ่าน blob → tree → commit → ref */
+const uploadBinary = async (path: string, blob: Blob, message: string): Promise<string> => {
+  const { repo, branch } = cfg;
+  const b = await gh(`/repos/${repo}/git/blobs`, {
+    method: "POST",
+    body: JSON.stringify({ content: await blobToB64(blob), encoding: "base64" }),
+  }) as { sha: string };
+  const ref = await gh(`/repos/${repo}/git/ref/heads/${branch}`) as { object: { sha: string } };
+  const head = await gh(`/repos/${repo}/git/commits/${ref.object.sha}`) as { tree: { sha: string } };
+  const tree = await gh(`/repos/${repo}/git/trees`, {
+    method: "POST",
+    body: JSON.stringify({
+      base_tree: head.tree.sha,
+      tree: [{ path, mode: "100644", type: "blob", sha: b.sha }],
+    }),
+  }) as { sha: string };
+  const commit = await gh(`/repos/${repo}/git/commits`, {
+    method: "POST",
+    body: JSON.stringify({ message, tree: tree.sha, parents: [ref.object.sha] }),
+  }) as { sha: string };
+  await gh(`/repos/${repo}/git/refs/heads/${branch}`, {
+    method: "PATCH",
+    body: JSON.stringify({ sha: commit.sha }),
   });
   return `/${path}`;
+};
+
+/* ---------- ย่อรูปก่อนอัป ----------
+   รูปจากมือถือใบนึงราว 3–5 MB ย่อเหลือราว 200–400 KB */
+const MAX_EDGE = 1600;
+const shrinkImage = async (fileObj: File): Promise<Blob> => {
+  const bmp = await createImageBitmap(fileObj);
+  const scale = Math.min(1, MAX_EDGE / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement("canvas");
+  cv.width = Math.round(bmp.width * scale);
+  cv.height = Math.round(bmp.height * scale);
+  const ctx = cv.getContext("2d");
+  if (!ctx) throw new Error("เบราว์เซอร์ไม่รองรับการย่อรูป");
+  ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
+  bmp.close();
+  const out = await new Promise<Blob | null>((res) => cv.toBlob(res, "image/webp", 0.82));
+  if (!out) throw new Error("ย่อรูปไม่สำเร็จ");
+  return out;
+};
+
+const uploadImage = async (fileObj: File): Promise<string> => {
+  const small = await shrinkImage(fileObj);
+  const name = `${Date.now()}-${fileObj.name.replace(/\.[^.]+$/, "").replace(/[^\w-]/g, "-")}.webp`;
+  return uploadBinary(`${cfg.uploadDir}/${name}`, small, `อัปโหลดรูป ${name}`);
+};
+
+/* ---------- บีบวิดีโอก่อนอัป ----------
+   ดู docs/adr/0001 — อัดซ้ำขณะเล่นจริง ใช้เวลาเท่าความยาวคลิป */
+const VIDEO_LIMIT = 25 * 1024 * 1024;
+
+interface CapturableVideo extends HTMLVideoElement {
+  captureStream?: () => MediaStream;
+  mozCaptureStream?: () => MediaStream;
+}
+
+const compressVideo = (fileObj: File, onProgress: (pct: number) => void): Promise<Blob> =>
+  new Promise((resolve, reject) => {
+    const v = document.createElement("video") as CapturableVideo;
+    v.src = URL.createObjectURL(fileObj);
+    v.muted = true;
+    v.onerror = () => reject(new Error("เปิดไฟล์วิดีโอนี้ไม่ได้"));
+    v.onloadedmetadata = () => {
+      const grab = v.captureStream ?? v.mozCaptureStream;
+      if (!grab) { reject(new Error("เบราว์เซอร์นี้บีบวิดีโอไม่ได้ ใช้ลิงก์ YouTube แทน")); return; }
+      // เผื่อ 15% ให้เสียงและ container
+      const target = Math.round((VIDEO_LIMIT * 8 * 0.85) / Math.max(v.duration, 1));
+      const rec = new MediaRecorder(grab.call(v), {
+        videoBitsPerSecond: Math.min(Math.max(target, 500_000), 2_500_000),
+      });
+      const chunks: Blob[] = [];
+      rec.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+      rec.onstop = () => { URL.revokeObjectURL(v.src); resolve(new Blob(chunks, { type: rec.mimeType })); };
+      rec.onerror = () => reject(new Error("บีบวิดีโอไม่สำเร็จ"));
+      v.ontimeupdate = () => onProgress(Math.round((v.currentTime / v.duration) * 100));
+      v.onended = () => rec.stop();
+      rec.start(1000);
+      v.play().catch(() => reject(new Error("เล่นไฟล์วิดีโอไม่ได้")));
+    };
+  });
+
+const uploadVideo = async (fileObj: File, onProgress: (pct: number) => void): Promise<string> => {
+  const blob = fileObj.size <= VIDEO_LIMIT ? fileObj : await compressVideo(fileObj, onProgress);
+  if (blob.size > VIDEO_LIMIT) throw new Error("คลิปยังใหญ่เกิน 25 MB หลังบีบ ลองตัดให้สั้นลงหรือใช้ลิงก์ YouTube");
+  const ext = blob.type.includes("mp4") ? "mp4" : "webm";
+  const name = `${Date.now()}-${fileObj.name.replace(/\.[^.]+$/, "").replace(/[^\w-]/g, "-")}.${ext}`;
+  await uploadBinary(`public/videos/${name}`, blob, `อัปโหลดวิดีโอ ${name}`);
+  // public/ ถูกคัดลอกไปเป็นราก เส้นทางที่หน้าเว็บใช้จึงไม่มี public/
+  return `/videos/${name}`;
+};
+
+/* ---------- ตามสถานะ build ---------- */
+const watchBuild = async (): Promise<void> => {
+  const deadline = Date.now() + 5 * 60_000;
+  await new Promise((r) => window.setTimeout(r, 6000));
+  while (Date.now() < deadline) {
+    const res = await gh(`/repos/${cfg.repo}/actions/runs?branch=${cfg.branch}&per_page=1`) as {
+      workflow_runs: { status: string; conclusion: string | null }[];
+    };
+    const run = res.workflow_runs[0];
+    if (run?.status === "completed") {
+      if (run.conclusion === "success") toast("เว็บอัปเดตเรียบร้อยแล้ว");
+      else toast("อัปเดตเว็บไม่สำเร็จ ลองบันทึกอีกครั้ง", true);
+      return;
+    }
+    toast("กำลังอัปเดตเว็บ…");
+    await new Promise((r) => window.setTimeout(r, 5000));
+  }
+  toast("อัปเดตนานผิดปกติ ลองรีเฟรชหน้าเว็บดูอีกที", true);
 };
 
 /* ---------- สร้างฟอร์มตาม schema ---------- */
@@ -178,6 +290,35 @@ const renderField = (f: Field, obj: Row): HTMLElement => {
     return wrap;
   }
 
+  if (f.type === "video") {
+    const wrap = el("div", "fld");
+    wrap.appendChild(el("span", "", f.label));
+    const status = el("small", "hint", String(obj[f.name] ?? "ยังไม่มีไฟล์"));
+    const pick = el("input");
+    pick.type = "file";
+    pick.accept = "video/*";
+    pick.addEventListener("change", () => {
+      const chosen = pick.files?.[0];
+      if (!chosen) return;
+      pick.disabled = true;
+      const big = chosen.size > VIDEO_LIMIT;
+      status.textContent = big ? "กำลังบีบคลิป อย่าปิดหรือสลับแท็บ…" : "กำลังอัปโหลด…";
+      uploadVideo(chosen, (pct) => { status.textContent = `กำลังบีบคลิป ${pct}% อย่าปิดหรือสลับแท็บ`; })
+        .then((path) => {
+          obj[f.name] = path;
+          status.textContent = path;
+          toast("อัปโหลดวิดีโอแล้ว");
+        })
+        .catch((e: unknown) => {
+          status.textContent = "อัปโหลดไม่สำเร็จ";
+          toast(String(e instanceof Error ? e.message : e), true);
+        })
+        .finally(() => { pick.disabled = false; });
+    });
+    wrap.append(pick, status);
+    return wrap;
+  }
+
   if (f.type === "select") {
     const sel = el("select");
     f.options.forEach((o) => {
@@ -216,7 +357,7 @@ const renderPanel = (col: Collection): void => {
     saveBtn.disabled = true;
     toast("กำลังบันทึก…");
     putFile(col.path, state.sha, `${JSON.stringify(body, null, 2)}\n`, `แก้ไข${col.label}ผ่านหน้าจัดการ`)
-      .then((sha) => { state.sha = sha; toast("บันทึกแล้ว เว็บจะอัปเดตใน 1–2 นาที"); })
+      .then((sha) => { state.sha = sha; toast("บันทึกแล้ว"); void watchBuild(); })
       .catch((e: unknown) => toast(`บันทึกไม่สำเร็จ: ${String(e)}`, true))
       .finally(() => { saveBtn.disabled = false; });
   });

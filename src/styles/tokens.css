@@ -3,29 +3,29 @@
    แก้สี ฟอนต์ ระยะ ที่ไฟล์นี้ที่เดียว
 --------------------------------------------------------------- */
 :root {
-  /* พื้น */
-  --paper: #fdf7f6;
+  /* 60 — พื้นกลาง เกือบขาว ไม่แย่งสีแบรนด์ */
+  --paper: #fafaf8;
   --paper-2: #ffffff;
-  --paper-edge: #f2e3e2;
+  --paper-edge: #e6e6e2;
 
   /* ตัวอักษร */
-  --ink: #4a3f45;
-  --ink-2: #7c6f76;
-  --ink-3: #a89aa1;
+  --ink: #23302e;
+  --ink-2: #5c6866;
+  --ink-3: #949c9a;
 
-  /* สีเน้น */
-  --ink-red: #d47a94;   /* ชมพูกุหลาบ */
-  --ink-blue: #7fa8c9;  /* ฟ้าอ่อน */
-  --ink-green: #8fba9c; /* เขียวมิ้นต์ */
+  /* สีเน้น — ดึงจากโลโก้ Lotus's go fresh */
+  --ink-red: #00b0a8;   /* เขียวเทอร์ควอยซ์ — สีหลัก */
+  --ink-blue: #00949d;  /* เทอร์ควอยซ์เข้ม */
+  --ink-green: #8dc63f; /* เขียวมะนาว go fresh */
+  --ink-yellow: #f5c518;/* เหลืองจากเครื่องหมาย ' */
 
-
-  --rule: #f0dfe1;
+  --rule: #e0e0dc;
 
   --radius: 14px;
   --radius-sm: 10px;
 
-  --shadow-photo: 0 2px 4px rgba(150, 110, 125, .07), 0 10px 24px -14px rgba(150, 110, 125, .35);
-  --shadow-lift: 0 4px 8px rgba(150, 110, 125, .1), 0 22px 40px -20px rgba(150, 110, 125, .42);
+  --shadow-photo: 0 2px 4px rgba(20, 95, 92, .07), 0 10px 24px -14px rgba(20, 95, 92, .35);
+  --shadow-lift: 0 4px 8px rgba(20, 95, 92, .1), 0 22px 40px -20px rgba(20, 95, 92, .42);
 
   --font-display: "Mali", "IBM Plex Sans Thai Looped", sans-serif;
   --font-body: "IBM Plex Sans Thai Looped", system-ui, sans-serif;
@@ -38,16 +38,17 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #262127;
-    --paper-2: #302a31;
-    --paper-edge: #3f3740;
-    --ink: #f0e6ea;
-    --ink-2: #c2b4bb;
-    --ink-3: #988c93;
-    --ink-red: #eda2b6;
-    --ink-blue: #a4c6e0;
-    --ink-green: #a9d3b5;
-    --rule: #453c46;
+    --paper: #1b1e1e;
+    --paper-2: #262a2a;
+    --paper-edge: #363b3b;
+    --ink: #eceeed;
+    --ink-2: #b6bdbb;
+    --ink-3: #878e8d;
+    --ink-red: #3fd0c4;
+    --ink-blue: #6fc5cf;
+    --ink-green: #a8d95e;
+    --ink-yellow: #f7d45a;
+    --rule: #363b3b;
     --shadow-photo: 0 2px 4px rgba(0, 0, 0, .3), 0 10px 24px -14px rgba(0, 0, 0, .6);
     --shadow-lift: 0 4px 8px rgba(0, 0, 0, .35), 0 22px 40px -20px rgba(0, 0, 0, .7);
   }
@@ -229,11 +230,100 @@ a { color: inherit; }
   background-repeat: no-repeat;
   box-shadow: none;
 }
-.taped.tape-left::after  { left: 26px; translate: 0 0; rotate: -5deg; }
-.taped.tape-right::after { left: auto; right: 24px; translate: 0 0; rotate: 4deg; }
+.taped.tape-left::after  { left: 26px; translate: 0 0; rotate: -5deg; --tape-rot: -5deg; }
+.taped.tape-right::after { left: auto; right: 24px; translate: 0 0; rotate: 4deg; --tape-rot: 4deg; }
 
-.washi-grid  { --washi: url("/internship-portfolio/decor/tape-grid.png"); }
-.washi-berry { --washi: url("/internship-portfolio/decor/tape-berry.png"); }
-.washi-heart { --washi: url("/internship-portfolio/decor/tape-heart.png"); }
-.washi-dot   { --washi: url("/internship-portfolio/decor/tape-dot.png"); }
-.washi-star  { --washi: url("/internship-portfolio/decor/tape-kraft.png"); }
+/* ------------------------ ความเคลื่อนไหว ------------------------
+   ใช้ scroll-driven animation ของเบราว์เซอร์ ไม่มี JS
+   เบราว์เซอร์ที่ยังไม่รองรับจะเห็นเนื้อหาปกติ ไม่พัง */
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(26px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 26%;
+    }
+  }
+}
+
+/* เทปขยับตอนชี้การ์ด เหมือนกาวใกล้หลุด */
+@keyframes tape-wiggle {
+  0%   { rotate: var(--tape-rot, -2deg); }
+  40%  { rotate: calc(var(--tape-rot, -2deg) + 3deg); translate: 0 -1px; }
+  100% { rotate: var(--tape-rot, -2deg); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .polaroid:hover::after,
+  .sheet:hover::after { animation: tape-wiggle .5s ease; }
+}
+
+/* เลขสัปดาห์ตัวใหญ่ลอยเบา ๆ ตลอดเวลา */
+@keyframes drift {
+  50% { transform: translateY(-7px) rotate(-1.5deg); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .float { animation: drift 6s ease-in-out infinite; }
+}
+
+/* คลิปหนีบกระดาษกระดิกตอนชี้ */
+@media (prefers-reduced-motion: no-preference) {
+  .brand:hover .clip { animation: tape-wiggle .55s ease; }
+}
+
+/* ปุ่มเมนูที่เลือกอยู่ "กระโดด" ไปแท็บใหม่ตอนเปลี่ยนหน้า
+   ::view-transition-group ย้ายตำแหน่งให้เอง เราแค่ใส่จังหวะเด้ง */
+@keyframes pill-hop {
+  50% { translate: 0 -7px; scale: 1.12; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(navpill) {
+    animation-duration: .42s;
+    animation-timing-function: cubic-bezier(.34, 1.4, .5, 1);
+  }
+  ::view-transition-new(navpill),
+  ::view-transition-old(navpill) {
+    animation: pill-hop .42s cubic-bezier(.34, 1.4, .5, 1);
+  }
+}
+
+/* เนื้อหาไล่โผล่ขึ้นมาตอนเพิ่งเข้าหน้า
+   main ถูกสร้างใหม่ทุกครั้งที่เปลี่ยนหน้า อนิเมชันเลยเล่นซ้ำเอง */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(34px) scale(.97); }
+  60%  { opacity: 1; }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  main > * { animation: page-in .62s cubic-bezier(.2, 1.15, .3, 1) both; }
+  main > *:nth-child(2) { animation-delay: .09s; }
+  main > *:nth-child(3) { animation-delay: .18s; }
+  main > *:nth-child(4) { animation-delay: .26s; }
+  main > *:nth-child(n+5) { animation-delay: .32s; }
+
+  /* การ์ดในกริดไล่ขึ้นทีละใบ ไม่ขึ้นพร้อมกันทั้งแผง */
+  .stagger > * { animation: page-in .55s cubic-bezier(.2, 1.15, .3, 1) both; }
+  .stagger > *:nth-child(2) { animation-delay: .06s; }
+  .stagger > *:nth-child(3) { animation-delay: .12s; }
+  .stagger > *:nth-child(4) { animation-delay: .18s; }
+  .stagger > *:nth-child(5) { animation-delay: .24s; }
+  .stagger > *:nth-child(n+6) { animation-delay: .3s; }
+
+  /* หน้าเก่าเลื่อนออก หน้าใหม่เลื่อนเข้า */
+  ::view-transition-old(root) {
+    animation: page-out .3s cubic-bezier(.4, 0, 1, 1) both;
+  }
+  ::view-transition-new(root) {
+    animation: page-in .45s cubic-bezier(.2, 1.05, .3, 1) both;
+  }
+}
+
+@keyframes page-out {
+  to { opacity: 0; transform: translateY(-16px) scale(.99); }
+}

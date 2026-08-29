@@ -1,5 +1,6 @@
 ---
 import "../styles/tokens.css";
+import { ClientRouter } from "astro:transitions";
 import { getEntry } from "astro:content";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 const { title, description } = Astro.props;
 const profile = await getEntry("profile", "profile");
 const name = profile?.data.fullName ?? "";
+const company = profile?.data.company ?? "";
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const here = Astro.url.pathname.replace(/\/$/, "");
 
@@ -33,7 +35,8 @@ const isActive = (href: string) => {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} · {name}</title>
     {description && <meta name="description" content={description} />}
-    <meta name="theme-color" content="#fdf7f6" />
+    <ClientRouter />
+    <meta name="theme-color" content="#f2fbfa" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -47,10 +50,11 @@ const isActive = (href: string) => {
     <header class="site-head">
       <div class="page head-inner">
         <a href={base} class="brand">
-          <span class="clip" aria-hidden="true"></span>
+          <img class="cologo" src={`${base}company-logo.webp`} alt="" width="128" height="128" />
           <span class="brand-text">
-            <strong>{name}</strong>
-            <em class="hand">สมุดบันทึกฝึกงาน</em>
+            <em class="eyebrow">สมุดบันทึกฝึกงานที่</em>
+            <strong>{company}</strong>
+            <em class="hand">{name}</em>
           </span>
         </a>
 
@@ -68,6 +72,7 @@ const isActive = (href: string) => {
                 class:list={["nav-link", { on: isActive(item.href) }]}
                 style={`--tilt:${(i % 2 ? 1 : -1) * (0.25 + (i % 3) * 0.12)}deg`}
               >
+                {isActive(item.href) && <span class="pill" aria-hidden="true" />}
                 {item.label}
               </a>
             ))
@@ -90,7 +95,22 @@ const isActive = (href: string) => {
       </div>
     </footer>
 
-    <style>
+    <style
+      is:global
+      define:vars={{
+        wGrid: `url(${base}decor/tape-grid.png)`,
+        wBerry: `url(${base}decor/tape-berry.png)`,
+        wHeart: `url(${base}decor/tape-heart.png)`,
+        wDot: `url(${base}decor/tape-dot.png)`,
+        wStar: `url(${base}decor/tape-kraft.png)`,
+      }}
+    >
+      .washi-grid  { --washi: var(--wGrid); }
+      .washi-berry { --washi: var(--wBerry); }
+      .washi-heart { --washi: var(--wHeart); }
+      .washi-dot   { --washi: var(--wDot); }
+      .washi-star  { --washi: var(--wStar); }
+
       .skip {
         position: absolute;
         left: -9999px;
@@ -117,6 +137,9 @@ const isActive = (href: string) => {
       }
 
       .brand { display: inline-flex; align-items: center; gap: .8rem; text-decoration: none; }
+
+      .cologo { width: 128px; height: 128px; object-fit: contain; flex: none; border-radius: 8px; }
+      .eyebrow { font-size: .72rem; font-style: normal; color: var(--ink-3); letter-spacing: .02em; }
 
       /* คลิปหนีบกระดาษ */
       .clip {
@@ -155,11 +178,18 @@ const isActive = (href: string) => {
         transition: color .18s ease;
       }
       .nav-link:hover { color: var(--ink); }
-      .nav-link.on {
-        color: var(--ink-red);
-        font-weight: 600;
-        background: color-mix(in srgb, var(--ink-red) 13%, transparent);
+      .nav-link.on { color: var(--ink-red); font-weight: 600; isolation: isolate; }
+
+      /* พื้นหลังเม็ดยาเป็น element แยก ตัวหนังสือไม่ขยับตาม */
+      .pill {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
         border-radius: 99px;
+        background: color-mix(in srgb, var(--ink-red) 13%, transparent);
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .pill { view-transition-name: navpill; }
       }
 
       .burger { display: none; }
