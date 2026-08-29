@@ -92,6 +92,7 @@ const isActive = (href: string) => {
         <p class="stamped">
           ปรับปรุงล่าสุด {new Date().toLocaleDateString("th-TH", { dateStyle: "long" })}
         </p>
+        <p><a href={`${base}admin/`} class="admin-link">จัดการข้อมูล</a></p>
       </div>
     </footer>
 
@@ -235,6 +236,16 @@ const isActive = (href: string) => {
 
       .site-foot { padding-bottom: 2.5rem; text-align: center; }
       .site-foot p { color: var(--ink-3); }
+      .admin-link {
+        display: inline-block;
+        margin-top: .7rem;
+        font-size: .8rem;
+        color: var(--ink-3);
+        text-decoration: none;
+        border-bottom: 1px dashed var(--rule);
+      }
+      .admin-link:hover { color: var(--ink-red); border-color: var(--ink-red); }
+
       .stamped {
         font-size: .78rem;
         letter-spacing: .12em;
