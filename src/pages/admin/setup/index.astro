@@ -1,0 +1,135 @@
+---
+import "../../../styles/tokens.css";
+---
+
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>ตั้งค่าครั้งแรก · สมุดบันทึกฝึกงาน</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600&family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600&display=swap" />
+  </head>
+  <body>
+    <main class="page wrap">
+      <h1>ตั้งค่าครั้งแรก</h1>
+      <p class="muted">
+        หน้านี้ช่วยเตรียมค่าที่ต้องเอาไปกรอกใน Cloudflare ตอนติดตั้ง
+        ใช้ครั้งเดียวตอนแรกสุด หลังจากนั้นไม่ต้องเข้ามาอีก
+      </p>
+
+      <section class="sheet pad">
+        <p class="safe">
+          รหัสผ่านที่พิมพ์ในหน้านี้ <strong>ไม่ถูกส่งออกจากเครื่องคุณ</strong>
+          การคำนวณทั้งหมดเกิดขึ้นในเบราว์เซอร์ ปิดหน้านี้แล้วไม่มีอะไรเหลือ
+        </p>
+
+        <label class="fld">
+          <span>ตั้งรหัสผ่านที่จะใช้เข้าหน้าจัดการข้อมูล</span>
+          <input id="pw" type="password" autocomplete="new-password" placeholder="อย่างน้อย 12 ตัวอักษร" />
+        </label>
+        <p id="warn" class="warn" hidden>รหัสผ่านสั้นเกินไป ขอให้ยาวอย่างน้อย 12 ตัวอักษร</p>
+
+        <div class="out">
+          <h2>ค่าที่ต้องเอาไปกรอก</h2>
+          <p class="muted small">กดปุ่มคัดลอก แล้วนำไปวางในช่องชื่อเดียวกันบนหน้า Cloudflare</p>
+
+          <div class="pair">
+            <code>ADMIN_PASS_SHA256</code>
+            <output id="hash">— พิมพ์รหัสผ่านด้านบนก่อน —</output>
+            <button class="ghost" data-copy="hash" type="button">คัดลอก</button>
+          </div>
+
+          <div class="pair">
+            <code>SESSION_SECRET</code>
+            <output id="secret"></output>
+            <button class="ghost" data-copy="secret" type="button">คัดลอก</button>
+          </div>
+        </div>
+      </section>
+
+      <p class="muted small">ตั้งเสร็จแล้วกลับไปทำขั้นตอนต่อไปในคู่มือได้เลย</p>
+    </main>
+
+    <script>
+      const $ = (id: string) => document.getElementById(id) as HTMLElement;
+      const hex = (buf: ArrayBuffer): string =>
+        [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+
+      /* สุ่มกุญแจสำหรับเซ็นบัตรผ่าน ให้ทันทีที่เปิดหน้า ไม่ต้องรออะไร */
+      const bytes = crypto.getRandomValues(new Uint8Array(32));
+      $("secret").textContent = btoa(String.fromCharCode(...bytes));
+
+      const pw = $("pw") as HTMLInputElement;
+      pw.addEventListener("input", () => {
+        const value = pw.value;
+        $("warn").hidden = value.length === 0 || value.length >= 12;
+        if (!value) {
+          $("hash").textContent = "— พิมพ์รหัสผ่านด้านบนก่อน —";
+          return;
+        }
+        void crypto.subtle
+          .digest("SHA-256", new TextEncoder().encode(value))
+          .then((d) => { $("hash").textContent = hex(d); });
+      });
+
+      document.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach((b) => {
+        b.addEventListener("click", () => {
+          const text = $(b.dataset.copy ?? "").textContent ?? "";
+          if (text.startsWith("—")) return;
+          void navigator.clipboard.writeText(text).then(() => {
+            const was = b.textContent;
+            b.textContent = "คัดลอกแล้ว";
+            window.setTimeout(() => { b.textContent = was; }, 1500);
+          });
+        });
+      });
+    </script>
+
+    <style is:global>
+      body { background: var(--paper); }
+      [hidden] { display: none !important; }
+      .wrap { max-width: 720px; padding-block: 2.5rem 4rem; display: grid; gap: 1.1rem; }
+      h1 { font-size: 1.5rem; }
+      h2 { font-size: 1.05rem; margin-bottom: .3rem; }
+      .muted { color: var(--ink-2); }
+      .small { font-size: .88rem; }
+      .pad { padding: 1.4rem 1.5rem; display: grid; gap: 1.1rem; }
+      .safe {
+        background: color-mix(in srgb, var(--ink-green) 14%, transparent);
+        border: 1px solid color-mix(in srgb, var(--ink-green) 40%, transparent);
+        border-radius: var(--radius-sm); padding: .7rem .9rem; font-size: .92rem;
+      }
+      .fld { display: grid; gap: .35rem; }
+      .fld > span { font-size: .9rem; color: var(--ink-2); }
+      input {
+        width: 100%; font: inherit; font-size: 16px; color: var(--ink);
+        background: var(--paper-2); border: 1.5px solid var(--rule);
+        border-radius: var(--radius-sm); padding: .55rem .7rem;
+      }
+      input:focus { outline: 2px solid var(--ink-red); outline-offset: 1px; border-color: transparent; }
+      .warn { color: #b3261e; font-size: .88rem; }
+      .out { display: grid; gap: .8rem; border-top: 1px dashed var(--rule); padding-top: 1.1rem; }
+      .pair { display: grid; grid-template-columns: 1fr auto; gap: .4rem .8rem; align-items: center; }
+      .pair code {
+        grid-column: 1 / -1; font-size: .82rem; color: var(--ink-2);
+        background: var(--paper); border: 1px solid var(--rule);
+        border-radius: 5px; padding: .05rem .4rem; justify-self: start;
+      }
+      output {
+        font-family: ui-monospace, monospace; font-size: .84rem; word-break: break-all;
+        background: var(--paper); border: 1px solid var(--rule);
+        border-radius: var(--radius-sm); padding: .5rem .7rem; min-height: 2.4rem;
+      }
+      button { font: inherit; cursor: pointer; }
+      .ghost {
+        align-self: start; background: none; border: 1.5px solid var(--rule); color: var(--ink-2);
+        border-radius: 99px; padding: .4rem 1rem; font-size: .88rem; white-space: nowrap;
+      }
+      .ghost:hover { color: var(--ink); border-color: var(--ink-3); }
+      @media (max-width: 560px) { .pair { grid-template-columns: 1fr; } }
+    </style>
+  </body>
+</html>

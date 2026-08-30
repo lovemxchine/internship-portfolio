@@ -599,7 +599,9 @@ export const mountAdmin = (): void => {
   void fetch(`${base}admin/settings.json`)
     .then((r) => r.json() as Promise<Settings>)
     .then((s) => {
-      cfg = { ...s, collections };
+      // repo ที่ build มาให้ชนะค่าในไฟล์ตั้งค่า ย้ายบัญชีแล้วไม่ต้องแก้ตาม
+      const built = document.querySelector<HTMLMetaElement>('meta[name="ipf-repo"]')?.content;
+      cfg = { ...s, repo: built || s.repo, collections };
       const saved = localStorage.getItem(SESSION_KEY);
       if (saved) {
         session = saved;

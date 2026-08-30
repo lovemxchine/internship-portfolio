@@ -2,6 +2,8 @@
 import "../../styles/tokens.css";
 import { COLLECTIONS } from "./schema";
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+// repo เดาเองได้จากตัวแปรของ GitHub Actions ลูกค้าจึงไม่ต้องแก้ค่านี้เอง
+const repo = process.env.GITHUB_REPOSITORY ?? "";
 ---
 
 <html lang="th">
@@ -10,6 +12,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
     <meta name="ipf-base" content={base} />
+    <meta name="ipf-repo" content={repo} />
     <title>จัดการข้อมูล · สมุดบันทึกฝึกงาน</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
