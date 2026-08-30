@@ -49,9 +49,9 @@
 ## 6 · สมัคร Cloudflare แล้วกดปุ่มเดียว
 
 1. สมัคร https://dash.cloudflare.com/sign-up (อีเมลอย่างเดียว)
-2. กลับมาที่ repo ของคุณ กดปุ่มนี้ในหน้า README ของ **repo ตัวเอง**
+2. เปิดที่อยู่นี้ โดยแทน `<ชื่อบัญชี>` ด้วยชื่อบัญชี GitHub ของคุณ
 
-   [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/lovemxchine/internship-portfolio-template/tree/main/worker)
+   `https://deploy.workers.cloudflare.com/?url=https://github.com/<ชื่อบัญชี>/internship-portfolio/tree/main/worker`
 
 3. ระบบจะถามค่า 4 ช่อง กรอกตามนี้
 
