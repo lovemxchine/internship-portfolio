@@ -1,0 +1,9 @@
+# ความลับ 3 อย่างที่ Worker ต้องใช้ ตอนกดปุ่ม Deploy ระบบจะถามให้กรอกทีละช่อง
+# ชื่อผู้ใช้สำหรับเข้าหน้าจัดการข้อมูล
+ADMIN_USER = ""
+# รหัสผ่านที่แปลงแล้ว (เอามาจากหน้า /admin/setup/ ของเว็บคุณ)
+ADMIN_PASS_SHA256 = ""
+# ข้อความสุ่ม (เอามาจากหน้า /admin/setup/ เช่นกัน)
+SESSION_SECRET = ""
+# GitHub token สิทธิ์ Contents: Read and write เฉพาะ repo นี้
+GH_TOKEN = ""

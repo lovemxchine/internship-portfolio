@@ -8,7 +8,6 @@
  * ผู้ใช้ไม่เคยเห็นโทเคน GitHub เลย ตัวโทเคนไม่ออกจาก Worker
  *
  * ตั้งค่าใน Settings > Variables and Secrets ของ Worker
- *   ALLOWED_ORIGINS    โดเมนเว็บที่เรียกได้ คั่นด้วยจุลภาค (ค่าธรรมดา อยู่ใน wrangler.toml)
  *   ADMIN_USER         ชื่อผู้ใช้
  *   ADMIN_PASS_SHA256  sha-256 ของรหัสผ่าน เป็น hex ตัวพิมพ์เล็ก
  *   SESSION_SECRET     ข้อความสุ่มยาว ๆ ใช้เซ็นบัตรผ่าน
@@ -48,9 +47,12 @@ const validSession = async (env, value) => {
   return same(sig, await hmac(env.SESSION_SECRET, exp));
 };
 
+/** โดเมนที่เรียกได้ คิดเองจาก GH_REPO ลูกค้าจึงไม่ต้องกรอกช่องที่พิมพ์ผิดแล้วพังเงียบ ๆ */
+const allowed = (env) => [`https://${env.GH_REPO.split("/")[0]}.github.io`, "http://localhost:4321"];
+
 /** สะท้อน Origin กลับเฉพาะที่อยู่ในรายการ — ไม่ใช่ปล่อยผ่านทุกโดเมน */
 const originOf = (request, env) => {
-  const list = env.ALLOWED_ORIGINS.split(",").map((o) => o.trim());
+  const list = allowed(env);
   const origin = request.headers.get("Origin") ?? "";
   return list.includes(origin) ? origin : list[0];
 };
