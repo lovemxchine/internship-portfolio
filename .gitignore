@@ -28,3 +28,7 @@ pnpm-debug.log*
 
 test-results/
 playwright-report/
+
+# cloudflare worker local state / secrets
+.wrangler/
+.dev.vars
