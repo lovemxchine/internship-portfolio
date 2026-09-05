@@ -61,17 +61,17 @@
   "contacts": [
     {
       "label": "อีเมล",
-      "value": "name@example.com",
-      "href": "mailto:name@example.com"
+      "value": "Jane.sukanya1280@gmail.com",
+      "href": ""
     },
     {
       "label": "โทรศัพท์",
-      "value": "0xx-xxx-xxxx"
+      "value": "0984471280"
     },
     {
       "label": "โซเชียลมีเดีย",
-      "value": "ลิงก์โปรไฟล์",
-      "href": "https://example.com"
+      "value": "Instagram",
+      "href": "https://www.instagram.com/jazxe__?igsi=OXZqN2s4enBhdDl6&utm_source=qr"
     }
   ]
 }
