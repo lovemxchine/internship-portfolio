@@ -440,6 +440,11 @@ const renderPanel = (col: Collection): void => {
       toast(`ยังกรอกไม่ครบ: ${shown}${more}`, true);
       return;
     }
+    // ทุกแถวต้องมี id ไม่งั้น Astro ทิ้งทั้งรายการตอน build แล้วเว็บขึ้นว่างแบบไม่มี error
+    if (col.shape === "list")
+      (state.data as Record<string, unknown>[]).forEach((row, i) => {
+        if (!row.id) row.id = `${col.key}-${Date.now()}-${i}`;
+      });
     const body = col.shape === "list" ? { items: state.data } : state.data;
     saveBtn.disabled = true;
     saveNote.textContent = "กำลังบันทึก…";

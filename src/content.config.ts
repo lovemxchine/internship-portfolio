@@ -14,9 +14,18 @@ const weekPhoto = ({ image }: { image: () => ZodType }) =>
     caption: z.string().default(""),
   });
 
+/**
+ * เติม id ให้รายการที่ไม่มี — ไม่งั้น file loader ทิ้งทั้งรายการ
+ * แล้ว build ยังผ่านเฉย ๆ เว็บขึ้นว่างโดยไม่มีใครรู้
+ */
+const withIds = <T extends Record<string, unknown>>(items: T[], prefix: string) =>
+  items.map((it, i) => (it.id ? it : { ...it, id: `${prefix}-${String(i + 1).padStart(2, "0")}` }));
+
 /** ผลงานรายสัปดาห์ — 1 ไฟล์ = 1 สัปดาห์ */
 const weeks = defineCollection({
-  loader: file("./src/content/weeks.json", { parser: (t: string) => JSON.parse(t).items }),
+  loader: file("./src/content/weeks.json", {
+    parser: (t: string) => withIds(JSON.parse(t).items, "week"),
+  }),
   schema: ({ image }) =>
     z.object({
       id: z.string(),
@@ -55,7 +64,9 @@ const profile = defineCollection({
 
 /** แกลเลอรี — รูปหรือวิดีโอลอย ไม่ผูกสัปดาห์ */
 const gallery = defineCollection({
-  loader: file("./src/content/gallery.json", { parser: (t: string) => JSON.parse(t).items }),
+  loader: file("./src/content/gallery.json", {
+    parser: (t: string) => withIds(JSON.parse(t).items, "g"),
+  }),
   schema: ({ image }) =>
     z.discriminatedUnion("kind", [
       z.object({
