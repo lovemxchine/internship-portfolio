@@ -64,17 +64,17 @@
   "contacts": [
     {
       "label": "อีเมล",
-      "value": "Jane.sukanya1280@gmail.com",
+      "value": "",
       "href": ""
     },
     {
       "label": "โทรศัพท์",
-      "value": "0984471280"
+      "value": ""
     },
     {
       "label": "โซเชียลมีเดีย",
       "value": "Instagram",
-      "href": "https://www.instagram.com/jazxe__?igsi=OXZqN2s4enBhdDl6&utm_source=qr"
+      "href": ""
     }
   ]
 }
